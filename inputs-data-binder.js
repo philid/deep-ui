@@ -1,0 +1,445 @@
+/**
+ * @author Gilles Coomans <gilles.coomans@gmail.com>
+ */
+/*
+For client use only (need jquery)
+*/
+if(typeof define !== 'function'){
+	var define = require('amdefine')(module);
+}
+define(function(require){
+
+	console.log("Define of InputsDataBinder");
+	
+	var utils = require("deep/utils");
+    var deepCopy = require("deep/utils").deepCopy;
+    var retrieveFullSchemaByPath = require("deep/utils").retrieveFullSchemaByPath;
+    var promise = require("deep/promise");
+	var Validator = require("deep/deep-schema");
+
+	var InputsDataBinder =  function (){
+		console.log("InputsDataBinder Constructor : ", this);
+	};
+	
+	InputsDataBinder.prototype.datas = null;
+	InputsDataBinder.prototype.pathMap = null;
+	InputsDataBinder.prototype.output = null;
+	InputsDataBinder.prototype.inputs = null;
+
+	InputsDataBinder.prototype.parentSelector = null;
+	InputsDataBinder.prototype.init = function init(parentSelector, input_datas, schema){
+		this.output = {};
+		this.inputs = [];
+		this.schema = schema || {};
+		this.parentSelector = parentSelector;
+		if(input_datas){
+			this.datas = input_datas;
+			this.fillFields(input_datas);
+		}
+		else
+			this.datas = {};
+		return this;
+	}
+
+
+	InputsDataBinder.prototype.replaceInDataPaths = function replaceInDataPaths(what, by)
+	{
+		$(this.parentSelector + " input[data-path]").each(function replaceInputsDataPath(){
+			var path = $(this).attr("data-path");
+			// console.log("createPathMap : got "+path)
+			$(this).attr("data-path", path.replace(what, by));
+		});
+		$(this.parentSelector + " select[data-path]").each(function replaceSelectDataPath(){
+			var path = $(this).attr("data-path");
+			$(this).attr("data-path", path.replace(what, by));
+		});
+		$(this.parentSelector + " textarea[data-path]").each(function replaceTextAreaDataPath(){
+			var path = $(this).attr("data-path");
+			$(this).attr("data-path", path.replace(what, by));
+		});
+		return this;
+	} 
+
+	InputsDataBinder.prototype.toDatas = function toDatas()
+	{
+		//console.log("InputsDataBinder.toDatas : contaxt.datas ? "+this.context.datas)	
+		this.output = {};
+		this.createPathMap();
+
+		//tinyMCE.triggerSave();
+		//console.log("InputsDataBinder.toDatas : after createPathMap : this.output ? "+JSON.stringify(this.output))
+		for(var f in this.pathMap)
+		{
+			//console.log("INputsDataBinder.toDatas() : analyse path map : key : ", f);
+			for(var i = 0; i < this.pathMap[f].entries.length; ++i)
+			{
+				var field = this.pathMap[f].entries[i];
+				var val = null;
+				switch(field.type){
+					case "checkbox" : 
+						if($(field.input).prop("checked"))
+							val = $(field.input).val();
+						break;
+						
+					case "button" : break;
+					case "submit" : break;
+
+					case "radio" : 
+						if($(field.input).prop("checked"))
+							val = $(field.input).val();
+						break;
+					
+					case "select" :
+						val = new Array();
+						$(field.input).find("option:selected").each(function(){
+							val.push($(this).val());
+						})
+						if(!$(field.input).prop("multiple") && val.length == 1)
+							val = val.shift();
+						break;
+
+					case "text" :
+					case "hidden":
+					case "password":
+					case "textarea":
+						val = $(field.input).val();
+						break;
+					default : // text, hidden, textarea
+						null;
+				}
+				if(val == "null" || val == "undefined" || val == undefined)
+					val = null;
+
+				//console.log("INputsDataBinder.toDatas() : analyse field : ", field )
+				//console.log("INputsDataBinder.toDatas() : field has schema: ", this.pathMap[f].schema )
+
+				if(this.pathMap[f].schema)
+				{
+					//console.log("DATA BINDER : to datas : ", f, " - ", this.pathMap[f].schema )
+					switch(this.pathMap[f].schema.type)
+					{
+						case "array" : 
+							if(field.lastNodeRef[field.lastPathPart] == null)
+								field.lastNodeRef[field.lastPathPart] = new Array();
+							break;
+						case "number" : val = parseFloat(val); break;	
+						case "float" : val = parseFloat(val); break;	
+						case "integer" : val = parseInt(val); break;
+						case "boolean" :
+							//console.log("VERIFY A BOOLEAN VALUE - value = ", val )
+							val = (val == 'true' || val == "1")?true:false;
+							break;	
+						default : ;
+					}
+	
+				}
+
+				if(field.lastNodeRef[field.lastPathPart] && field.lastNodeRef[field.lastPathPart].push)
+				{	
+					if(val != null)
+					{
+						field.lastNodeRef[field.lastPathPart].push(val);
+						this.pathMap[f].entries[i].val = field.lastNodeRef[field.lastPathPart];
+					}	
+				}
+				else 
+				{	
+					if(val != null && (field.type != "radio" ||  !this.pathMap[f].radioValue))
+					{
+						field.lastNodeRef[field.lastPathPart] = val;
+						this.pathMap[f].entries[i].val = field.lastNodeRef[field.lastPathPart];
+						if(field.type == 'radio')
+							this.pathMap[f].radioValue = val;
+					}		
+				
+					//if(val == "")
+					//	delete field.lastNodeRef[field.lastPathPart];
+				}
+			}	
+		}
+		//console.log("inputs-data-binder", "toDatas() give (before copy old datas): " , JSON.stringify(this.output), " - datas ? ",  JSON.stringify(this.datas))
+		//if(this.editMode)
+		if(this.datas)
+			deepCopy(this.datas, this.output, false);
+		//if(console.flags["inputs-data-binder"]) 
+			//console.log("inputs-data-binder", "toDatas() give : " + JSON.stringify(this.output))
+		return this.output;
+		//
+	}
+
+	InputsDataBinder.prototype.fillFields = function fillFields(datas)
+	{
+		this.createPathMap();
+		if(datas)
+			this.datas = datas;
+		//console.log("Fill Fields : pathMap : "+JSON.stringify(this.pathMap))
+			//console.log("inputs-data-binder", "fillFields() with : " + JSON.stringify(this.datas))
+
+		for(var i in this.pathMap)
+		{
+			//console.log("whats context before retrieve by path : " + JSON.stringify(this.context))
+
+			var value = utils.retrieveValueByPath(this.datas, i);
+			var valueIndex = 0;
+			for(var j = 0; j < this.pathMap[i].entries.length; ++j)
+			{
+				var field = this.pathMap[i].entries[j];
+				var val = value;
+				//console.log("Value obtained : " + value)
+				
+				if(value && value.push && value.forEach && value.length)
+				{
+					///console.log("fill fields : got array "+JSON.stringify(value))
+					val = value[valueIndex];
+					valueIndex++;
+				}
+				switch (field.type)
+				{
+					case "checkbox":
+						if(val == null)
+							break;
+						if($(field.input).val() == val || (val instanceof Array && utils.inArray($(field.input).val(),val)))			// ________________________  TODO : inArray !!!!!
+							$(field.input).prop("checked", true);
+						//	console.log("fill fields : checkbox case : value assigned : "+$(field.input).val() + " - for "+i);
+
+						break;
+					case "radio":
+						if(val == null)
+							break;
+						if($(field.input).val() == val){
+							$(field.input).prop("checked", true);
+							//console.log("fill fields : radio case : value assigned : "+$(field.input).val() + " - for "+i);
+						}
+						//code
+						break;
+					case "select":
+						if(val == null)
+							break;
+						$(field.input).find(" option[value='"+val+"']").prop("selected", true);
+					//	console.log("fill fields : select case : select : value assigned : "+$(field.input).val() + " - for "+i);
+						//code
+						break;
+					
+					default:
+						if(val == null)
+						{
+							$(field.input).val("");
+							break;
+						}
+						$(field.input).val(val);
+					//	console.log("fill fields : default case : input text : value assigned : "+$(field.input).val() + " - for "+i);
+						break;
+				}	
+			}
+		}
+		return this;
+	}
+
+	InputsDataBinder.prototype.createPathMap = function createPathMap(){
+		var pathMap = this.pathMap = new Object();
+		var othis = this;
+		var obj = this.output = {};
+		$(this.parentSelector + " input[data-path]").each(function createInputPathMap(){
+			var path = $(this).attr("data-path");
+			var schem = {};
+			if(othis.schema)
+				schem = retrieveFullSchemaByPath(othis.schema, path);
+			othis.inputs.push(this);
+		//	console.log("createPathMap : got "+path)
+			var parts = path.split(".");
+			var tmp = obj;
+			while(parts.length > 1)
+			{
+				var curPart = parts.shift();
+				if(typeof tmp[curPart] === "undefined")
+					tmp[curPart] = {};
+				tmp = tmp[curPart];
+			}	
+			var lastPart = parts.shift();
+			if(tmp[lastPart] == undefined)
+				tmp[lastPart] = null;	
+			if(!pathMap[path])
+				pathMap[path] = {};
+			pathMap[path].schema = schem;
+			if(!pathMap[path].entries)
+				pathMap[path].entries = new Array();
+			
+			pathMap[path].entries.push({input:this, schema:schem, type:$(this).attr("type"), val:null, lastPathPart:lastPart, lastNodeRef:tmp });
+		});
+		$(this.parentSelector + " select[data-path]").each(function createSelectPathMap(){
+			
+			var path = $(this).attr("data-path");
+			//console.log("createPathMap : got "+path)
+			var parts = path.split(".");
+			var schem = {};
+			if(othis.schema)
+				schem = retrieveFullSchemaByPath(othis.schema, path);
+			othis.inputs.push(this);
+			var tmp = obj;
+			while(parts.length > 1)
+			{
+				var curPart = parts.shift();
+				if(typeof tmp[curPart] === "undefined")
+					tmp[curPart] = new Object();
+				tmp = tmp[curPart];
+			}	
+			var lastPart = parts.shift();
+			if(tmp[lastPart] == undefined)
+				tmp[lastPart] = null;
+			if(!pathMap[path])
+				pathMap[path] = {};
+			pathMap[path].schema = schem;
+			if(!pathMap[path].entries)
+				pathMap[path].entries = new Array();
+			pathMap[path].entries.push( {input:this, val:null,  schema:schem, type:"select", lastPathPart:lastPart, lastNodeRef:tmp });
+		});
+		$(this.parentSelector + " textarea[data-path]").each(function createTextAreaPathMap(){
+			var path = $(this).attr("data-path");
+			if(othis.schema)
+				schem = retrieveFullSchemaByPath(othis.schema, path);
+			othis.inputs.push(this);
+			var parts = path.split(".");
+			var tmp = obj;
+			while(parts.length > 1)
+			{
+				var curPart = parts.shift();
+				if(typeof tmp[curPart] === "undefined")
+					tmp[curPart] = new Object();
+				tmp = tmp[curPart];
+			}	
+			var lastPart = parts.shift();
+			if(!pathMap[path])
+				pathMap[path] = {};
+			pathMap[path].schema = schem;
+			if(!pathMap[path].entries)
+				pathMap[path].entries = new Array();
+			pathMap[path].entries.push({input:this, val:null, type:"textarea",   schema:schem, lastPathPart:lastPart, lastNodeRef:tmp });
+		});
+		//console.log("end path map");
+		return this;
+	}
+
+	InputsDataBinder.prototype.clear = function()
+	{
+		//this.context.datas = {};
+		this.output = {};
+		$(this.parentSelector + " input").each(function clearInputs(){
+			var type = $(this).attr("type");
+			if(type == "text" || type == "hidden" )
+				$(this).val("");
+			if(type == "checkbox" || type == "radio")
+				$(this).prop("checked", false);
+		})
+		$(this.parentSelector + " select").find("option:selected").prop("selected", false);
+		$(this.parentSelector + " select").find("option:first").prop("selected", true);
+		$(this.parentSelector + " textarea").val("");
+		$(this.parentSelector + " input.error").removeClass("error");
+		$(this.parentSelector + " textarea.error").removeClass("error");
+		$(this.parentSelector + " select.error").removeClass("error");
+		return this;
+	}
+
+	InputsDataBinder.prototype.partialValidation = function(fields)
+	{
+		var deferred = promise.Deferred();
+		this.toDatas();
+		var othis = this;
+
+	//	if(console.flags["form-controller"]) console.log("form-controller", " will validate : " +JSON.stringify(this.output) + " - with : " + JSON.stringify(this.schema))
+		promise.when(Validator.partialValidation(this.output, this.schema, {fieldsToCheck:fields})).then(function validationDone(report)
+		//promise.when(Validator.partialValidation({ test:1, test2:'hello' }, { properties:{ test:{ type:'number', required:true }, test2:{ type:'string', required:true }}})).then(function validationDone(report)
+		{
+			//console.log("PURE REPORT : ", report)
+			//console.log("InputsDataBinder : VALIDATION done  : end : pathMap : ", othis.pathMap)
+			//console.log("InputsDataBinder partialValidation : ", othis.pathMap);
+			//console.log("InputsDataBinder partialValidation : ", report);
+
+			//if(console.flags["form-controller"]) 
+			if( !report.valid)
+			{
+			//	if(console.flags["form-controller"]) 
+				for(var i in report.errorsMap)
+				{
+					//console.log("CYCLE ON ERRORS : key : ", i)
+					//console.log("InputsDataBinder", "errors on validation ", report.errorsMap[i], othis.pathMap[i.substring(1)].entries)
+					var e = report.errorsMap[i];
+					if(othis.pathMap[i])
+						e.itemsMap = othis.pathMap[i].entries;
+					else
+						e.itemsMap = [];
+				}
+			}
+			//console.log("InputsDataBinder", " have validate : ",report)
+
+			deferred.resolve(report);
+		});
+		return promise.promise(deferred);  
+	}
+
+	InputsDataBinder.prototype.validate = function()
+	{
+		var deferred = promise.Deferred();
+		this.toDatas();
+	//	console.log("VAlidate output : ", this.output, " - ",this.schema);
+		var othis = this;
+
+	//	if(console.flags["form-controller"]) console.log("form-controller", " will validate : " +JSON.stringify(this.output) + " - with : " + JSON.stringify(this.schema))
+		promise.when(Validator.validate(this.output, this.schema)).then(function validationDone(report)
+		//promise.when(Validator.partialValidation({ test:1, test2:'hello' }, { properties:{ test:{ type:'number', required:true }, test2:{ type:'string', required:true }}})).then(function validationDone(report)
+		{
+			//console.log("PURE REPORT : ", report)
+			//console.log("InputsDataBinder : VALIDATION done  : end : pathMap : ", othis.pathMap)
+
+			//if(console.flags["form-controller"]) 
+			if( !report.valid)
+			{
+			//	if(console.flags["form-controller"]) 
+				for(var i in report.errorsMap)
+				{
+					//console.log("CYCLE ON ERRORS : key : ", i)
+					//console.log("InputsDataBinder", "errors on validation ", report.errorsMap[i], othis.pathMap[i.substring(1)].entries)
+					var e = report.errorsMap[i];
+					if(othis.pathMap[i.substring(1)])
+						e.itemsMap = othis.pathMap[i.substring(1)].entries;
+					else
+						e.itemsMap = [];
+				}
+			}
+			//console.log("InputsDataBinder", " have validate : ",report)
+
+			deferred.resolve(report);
+		});
+		return promise.promise(deferred);  
+	}
+
+
+
+	//____________________  EXAMPLE OF ERROR MANAGEMENT 
+
+
+	/*
+
+	function manageErrors(report)
+	{
+		if(!report.valid)
+		{
+			for(var i in report.errorsMap)
+			{
+				var e = report.errorsMap[i]
+				e.errors.forEach(function(err)
+				{
+					//if(console.flags["form-controller"]) console.log("form-controller","ERRORS  : "+JSON.stringify(err)+" - details : "+JSON.stringify(err.message))
+				});
+				e.itemsMap.forEach(function (inputMap){
+					//if(console.flags["form-controller"]) console.log("form-controller","ERRORS  : "+JSON.stringify(err)+" - details : "+JSON.stringify(err.message))
+					$(inputMap.input).css("background-color","#FF0000");
+				});
+			}
+		}
+	}
+
+
+	*/
+	return InputsDataBinder;
+
+});

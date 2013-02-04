@@ -1,0 +1,134 @@
+
+if(typeof define !== 'function'){
+	var define = require('amdefine')(module);
+	var swig = require("swig");
+}
+define(function(require){
+	var utils = require("deep/utils");
+	var JsonQuery = require("deep/deep-query");
+	var deepCopy = utils.deepCopy;
+	console.log("swig init");
+	var filtersObject = {
+		mongoIDtoStringID:function(input){
+			//return "test";
+			return input;
+		},
+		inArray:function(input, array){
+			return utils.inArray(input, array);
+		},
+		notnull : function(input) {
+			if(input == null || input == "null")
+				return "";
+			return input;
+		},
+		comaArray : function(input) {
+			var res = "";
+			var first = true;
+			for(var i = 0; i < input.length; ++i) {
+				if(!first)
+					res += ", ";
+				else
+					first = false;
+				res += String(input[i]);
+			}
+			return res;
+		},
+		writeTaxo : function(input, map) {
+
+			//console.log("Swig.writeTaxo : "+JSON.stringify(input))
+			//console.log( " - with : "+JSON.stringify(map))
+
+			var res = "";
+			var first = true;
+			for(var i = 0; i < input.length; ++i) {
+				if(!map["m" + input[i]])
+					continue;
+				if(!first)
+					res += ", ";
+				else
+					first = false;
+				res += String(map["m" + input[i]].label.fr);
+			}
+			return res;
+		},
+		idToLabel : function(id, collection, language) {
+ 
+            //console.log("Swig.idToLabel : "+JSON.stringify(id))
+            //console.log( " - with : "+JSON.stringify(language))
+ 
+            for(var i=0; i < collection.length ; i++){
+                var item = collection[i];
+ 
+                if(item.id == id){
+                    //console.log( "MATCHING : "+JSON.stringify(item.label[language]))
+                    return item.label[language];
+                }
+            }
+ 
+        },
+		selectIfinArray : function(what, inArr) {
+			if(utils.inArray(what, inArr))
+				return "selected";
+			return "";
+		},
+		checkIfinArray : function(what, inArr) {
+			if(utils.inArray(what, inArr))
+				return "checked";
+			return "";
+		},
+		smartdate : function(input) {
+			//console.log("to date : "+input)
+			var inp = parseInt(input);
+			var d = new Date(inp * 1000);
+			return d.toLocaleDateString() + " - " + d.toLocaleTimeString();
+		},
+		query: function(input, query){
+			if(input.path)
+					return JsonQuery.query(input, ((input.path != "/")?(input.path+"/"):input.path)+query, null, null, { keepCache:true });
+			return JsonQuery.query(input, query, null, null, { keepCache:true })
+		},
+		removeFirstChar: function(input){
+			return input.substring(1);
+		},
+		json:function(input){
+			return JSON.stringify(input, null, ' ')
+		},
+		floorDivision:function(input, by){
+			//console.log("floor division : ", input, " - ", by, " res : ", Math.floor(input/by))
+			return Math.floor(input/by);
+		},
+		ceilDivision:function(input, by){
+			//console.log("ceil division : ", input, " - ", by, " res : ", Math.ceil(input/by))
+			return Math.ceil(input/by);
+		},
+		gridCollumnIndex:function(input, numCols){
+			//console.log("gridCollumnIndex : ", input, " - ", numCols, " res : ", input%numCols)
+			return input%numCols;
+		},
+		isTypeOfObject:function(input){
+			console.log("typeofobject : ", input)
+			if(typeof input === "object"){
+				return true
+			}else{
+				return false
+			}
+		}
+	}
+	function init(layer)
+	{
+		var defaultObj = {
+			filters : filtersObject,
+			allowErrors: true,
+		    autoescape: true,
+		    encoding: 'utf8',
+		    root: '/',
+		    tags: {},
+		    extensions: {},
+		    tzOffset: 0
+		}
+		if(layer)
+			deepCopy(layer, defaultObj);
+		swig.init(defaultObj);
+	}
+	return init;
+})
