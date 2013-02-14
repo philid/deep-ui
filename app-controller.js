@@ -19,7 +19,7 @@ define(function AppControllerDefine(require){
 	var AppController =  {
 
 		init:function () {
-			console.log("INIT ");
+			console.log(" APP-CTRL INIT ");
 			othis=this;
 			$.address.externalChange(function(event) {
 				othis.urlChanged(event);
@@ -27,13 +27,13 @@ define(function AppControllerDefine(require){
 			$.address.internalChange(function (argument) {
 				// body...
 			})
-			return deep(this).query("./views/*").bottom(ViewController);
+			//return deep(this).query("./views/*").bottom(ViewController);
 		},
 		load:function () {
+			console.log("APP-CTRL load")
 			return deep(this)
-			.query("/externals")
-			.deepLoad()
-			.query("/!");
+			.query("./externals")
+			.deepLoad();
 		},
 		currentView:null,
 		updateDeepLink:function  (path) {

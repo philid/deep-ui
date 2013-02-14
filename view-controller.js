@@ -1,19 +1,68 @@
 if(typeof define !== 'function')
 	var define = require('amdefine')(module);
+/*
+	Render pattern : 
+	extrnals:{
+	
+	},
+	shrom :
+	{
+		what:"#../externals",
+		how:"swig::./templates/simple.html",
+		where:"dom.append::#id",
+		condition:true,
+		done:deep.compose.after(function(success){
+			
+		}),
+		fail:deep.compose.after(function(error){
+			
+		})
+	}
 
-define(function ViewControllerDefine(require)
+
+	reloadables : 
+		deep.request.reloadables("uri"||Ereg, true||false);
+		
+
+	request :
+		keep cache : 
+			swig::./templates/simple.html should be cached
+			dom.append::#id 		also cached
+			json::/campaign/   should not be cached
+
+		protocole 
+			requestHeaders
+			responseHeaders
+			requestParser
+			responseParser
+
+		json|json.range :
+			requestParser : 
+				path #deep.query 
+
+		html : 
+			requestParser : 
+				path
+
+		dom.* :
+			requestParser : 
+				jquery.selector
+*/
+define(function (require)
 {
 	var deep = require("deep/deep");
-	//var plugin = require("deep-ui/deep-plugin");
 	var ViewController = 
 	{
+		renderables:{
+
+		},
 		parentController:null,
 		domSelectors:null,
 		externals:null,
 		reloadables:null,
 		templates:null,
 		translations:null,
-		load:function(arg) 
+		load:deep.compose.createIfNecessary().after(function(arg) 
 		{
 			this.reloadables = {};
 			if(this._reloadables)
@@ -22,8 +71,8 @@ define(function ViewControllerDefine(require)
 				return deep(this).query("./reloadables").deepInterpret(this).deepLoad();
 			this.loaded = true;
 			return  deep(this).query("./[externals,templates,translations,reloadables]").deepInterpret(this).deepLoad();
-		},
-		render:function () 
+		}),
+		render:deep.compose.createIfNecessary().after(function () 
 		{
 			if(!this.rendered)
 				this.rendered = {};
@@ -32,8 +81,8 @@ define(function ViewControllerDefine(require)
 				this.rendered.self = "";
 			else
 				this.rendered.self = this.templates.self(this);
-		},
-		placeInDOM:function () 
+		}),
+		placeInDOM:deep.compose.createIfNecessary().after(function () 
 		{
 			if((this.domSelectors.parent || this.domSelectors.self) && this.rendered.self)
 				if(this.domSelectors.self && $(this.domSelectors.self).length > 0)
@@ -43,23 +92,28 @@ define(function ViewControllerDefine(require)
 					$(this.domSelectors.parent).empty();
 					$(this.rendered.self).appendTo(this.domSelectors.parent);
 				}
-		},
-		isInDOM:function (argument) 
+		}),
+		isInDOM:deep.compose.createIfNecessary().after(function () 
 		{
 			if(this.domSelectors.self)
 				return ($(this.domSelectors.self).length() > 0);
 			return null;
-		},
-		setBehaviour:function () {},
-		refresh:function (argument) 
+		}),
+		setBehaviour:deep.compose.createIfNecessary().after(function () {}),
+		refresh:deep.compose.createIfNecessary().after(function () 
 		{
-			this.render();
-			this.placeInDOM();
-			//console.log("ViewController.refresh : deepLinkPath : ", this.deepLinkPath)
-			if(this.deepLinkPath)
+			return deep(this)
+			.run("render")
+			.run("placeInDOM")
+			.query("./renderables/*")
+			.run(deep.ui.refreshRenderable)
+			.run(function () {
+				if(this.deepLinkPath)
 				_APP.updateDeepLink(this.deepLinkPath);
-			this.setBehaviour();
-		}
+			})
+			.run("setBehaviour");
+			
+		})
 	}
 
 	return ViewController;

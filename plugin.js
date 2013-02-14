@@ -5,6 +5,8 @@ if(typeof define !== 'function'){
 define(function (require){
 	//console.log("PLUGIN LOADED")
 	var deep = require("deep/deep");
+	var VC = require("deep-ui/view-controller");
+	var AC = require("deep-ui/app-controller");
 
 	var layer = {
 		prototype:{
@@ -94,10 +96,91 @@ define(function (require){
 				}
 				deep.chain.addInQueue.apply(this,[func]);
 				return this;
+			},
+			render:function (renderable) {
+				var self = this;
+				var func = function  (s,e) {
+					
+					var alls = [];
+					if(renderable)
+					{
+						self._entries.forEach(function (entry) {
+							alls.push(deep.ui.refreshRenderable.apply(renderable, [entry, true]));
+						});
+					}
+					else
+					{
+						self._entries.forEach(function (entry) {
+							if(typeof entry.refresh === 'function')
+								alls.push(entry.refresh());
+							else
+								alls.push(JSON.stringify(entry.value));
+						});
+					}
+					deep.all(alls)
+					.done(function (results) {
+						self.running = false;
+						deep.chain.nextQueueItem.apply(self, [results, null]);
+					})
+					
+				}
+				deep.chain.addInQueue.apply(this,[func]);
+				return this;
+				
 			}
 		}
 	}
+	deep.ui = {
+		viewController:VC,
+		appController:AC,
+		refreshRenderable : function (context, useContextAsDefaultWhat) 
+		{
+			if(!this.how || this.condition === false)
+				return false;
+			if(this.condition)
+				if(typeof this.condition === "function" && !this.condition())
+					return false;
+			context = context || this;
+			var self = this;
+			var objs = [];
+			//console.log("view-controller will retrieve : from : ",this._deep_entry)
+			if(this.what)
+				objs.push(deep.request.retrieve(this.what, { callFunctions:true, root:context._deep_entry || context, acceptQueryThis:true }));
+			if(typeof this.how === "string")
+				objs.push(deep.request.retrieve(this.how, { callFunctions:false, root:context._deep_entry || context, acceptQueryThis:true }));
+			if(typeof this.where === "string")
+				objs.push(deep.request.retrieve(this.where, { callFunctions:false, root:context._deep_entry || context, acceptQueryThis:true }));
 
+			return deep.all(objs)
+			.done(function (results) {
+				var what = (self.what)?results.shift():((useContextAsDefaultWhat)?context:{});
+				if(what._isDQ_NODE_)
+					what = what.value;
+				var how = (typeof self.how === "string")?results.shift():self.how;
+				var where = (typeof self.where === "string")?results.shift():self.where;
+				try{
+					self.rendered = how(what);
+					if(where)
+						self.nodes = where(self.rendered);
+				}
+				catch(e){
+					console.log("Error while rendering : ", e);
+					if(typeof self.fail === 'function')
+						return self.fail(e) || e;
+					return e;
+				}
+				if(typeof self.done === "function")
+					return self.done(self.nodes || self.rendered) || self.nodes || self.rendered;
+				return self.nodes || self.rendered; 
+			})
+			.fail(function  (error) {
+				console.log("Error while rendering : ", error);
+				if(typeof self.fail === 'function')
+					return self.fail(error) || error;
+				return error;
+			})
+		}
+	}
 	deep.utils.up( layer.prototype, deep.Handler.prototype);
 
 	//console.log("deep after lugin : ", layer)

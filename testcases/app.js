@@ -11,13 +11,11 @@ define(function(require){
 		//,"list-controller":true
 		//,"list-item-controller":true
 	};
-	var ListController = require("deep-ui/list-controller");
-	var Compose = require("compose");
+
+	require("deep-ui/plugin");
 	var composer = require("deep/deep-compose");
-	var deepCopy = require("deep/deep-copy");
-	var TestController = require("test-controller.js");
 	var utils = require("deep/utils");
-	require("deep/swig-init");
+	require("deep-ui/swig-init");
 	var init = function()
 	{	
 		console.log("app intialised");

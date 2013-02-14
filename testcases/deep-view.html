@@ -14,9 +14,9 @@
 	function doDeepEqualTest(title, a, b, resultNeeded)
 	{
 		count++;
-		$("#content-container").append("<br/>("+count+") <strong>"+title+"</strong><br/>")
-		$("#content-container").append("a : "+JSON.stringify(a, null, ' ')+"<br/>")
-		$("#content-container").append("b : "+JSON.stringify(b, null, ' ')+"<br/>")
+		$("#content-container").append("<br/>("+count+") <strong>"+title+"</strong><br/>");
+		$("#content-container").append("a : "+JSON.stringify(a, null, ' ')+"<br/>");
+		$("#content-container").append("b : "+JSON.stringify(b, null, ' ')+"<br/>");
 		var ok = deepEqual(a,b);
 		if(ok == resultNeeded)
 			success++;
@@ -151,6 +151,54 @@
 	promise.all(promises).then(function(){
 		printReport("view-controller", success, failed, count);
 	})
+
+
+//_______________________________________________
+
+var a = [{names:"john"},{names:"janis"},{names:"jim"}];
+
+deep(a)
+.query("./*")
+.render({
+    //what:"first::#./!",
+    how:"swig::./templates/simple.html",
+    where:function(rendered){
+      return $(rendered).appendTo("#content-container");
+    },
+    done:function(nodes){
+        $(nodes).click( function(e){ 
+            console.log("click"); 
+        })
+    }
+})
+.log()
+.logValues();
+
+//_______________________________________________
+
+var obj = {
+  backgrounds:[ deep.ui.viewController ],
+  datas:{ names:"john" },
+  renderables:{
+     self:{
+        what:"first::#../../datas",
+        how:"swig::./templates/simple.html",
+        where:function(rendered){
+            return $(rendered).appendTo("#content-container");
+        },
+        done:function(nodes){
+            $(nodes).click( function(e){ 
+                console.log("click"); 
+            })
+        }
+     }
+  }
+}
+
+deep(obj).flatten().run('refresh');
+
+//_______________________________________________
+
 
 })();
 </script>

@@ -9,15 +9,13 @@ console.flog = function(flag, message)
 }
 
 require.config({
-	 baseUrl: "/common/js-lib",
-    "packages": [{"name":"compose", "main":"compose.js"}]
+	 baseUrl: "/common/js-lib"
     ,paths:[{"deep":"deep"}]
    
 });
 require([ "app.js", "/common/js-lib/swig/swig.pack.min.js", "deep-ui/view-controller"], function( app ) {
   	 //console.log("requirejs main end callback 1 ");
-  	require("deep/deep-copy");
-
+  
   //	if(node)
   //	 app().then(function(){responseReady()});
   	//else
