@@ -102,14 +102,16 @@ define(function (require)
 		setBehaviour:deep.compose.createIfNecessary().after(function () {}),
 		refresh:deep.compose.createIfNecessary().after(function () 
 		{
+			var self = this;
 			return deep(this)
 			.run("render")
 			.run("placeInDOM")
 			.query("./renderables/*")
 			.run(deep.ui.refreshRenderable)
+			.root()
 			.run(function () {
-				if(this.deepLinkPath)
-				_APP.updateDeepLink(this.deepLinkPath);
+				if(self.deepLinkPath)
+					_APP.updateDeepLink(self.deepLinkPath);
 			})
 			.run("setBehaviour");
 			

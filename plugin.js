@@ -131,8 +131,8 @@ define(function (require){
 		}
 	}
 	deep.ui = {
-		viewController:VC,
-		appController:AC,
+		ViewController:VC,
+		AppController:AC,
 		refreshRenderable : function (context, useContextAsDefaultWhat) 
 		{
 			if(!this.how || this.condition === false)
