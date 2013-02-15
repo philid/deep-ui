@@ -105,7 +105,7 @@ define(function (require){
 					if(renderable)
 					{
 						self._entries.forEach(function (entry) {
-							alls.push(deep.ui.refreshRenderable.apply(renderable, [entry, true]));
+							alls.push(deep.ui.refreshRenderable.apply(renderable, [entry, true, true]));
 						});
 					}
 					else
@@ -166,7 +166,7 @@ define(function (require){
 		},
 		ViewController:VC,
 		AppController:AC,
-		refreshRenderable : function (context, useContextAsDefaultWhat) 
+		refreshRenderable : function (context, useContextAsDefaultWhat, dontKeepNodes) 
 		{
 			if(!this.how || this.condition === false)
 				return false;
@@ -191,10 +191,12 @@ define(function (require){
 					what = what.value;
 				var how = (typeof self.how === "string")?results.shift():self.how;
 				var where = (typeof self.where === "string")?results.shift():self.where;
+				var r = "";
+				var nodes = self.nodes;
 				try{
-					self.rendered = how(what);
+					r = how(what);
 					if(where)
-						self.nodes = where(self.rendered, self.nodes);
+						nodes = where(r, nodes);
 				}
 				catch(e){
 					console.log("Error while rendering : ", e);
@@ -202,9 +204,11 @@ define(function (require){
 						return self.fail(e) || e;
 					return e;
 				}
+				if(!dontKeepNodes)
+					self.nodes = nodes;
 				if(typeof self.done === "function")
-					return self.done(self.nodes || self.rendered) || self.nodes || self.rendered;
-				return self.nodes || self.rendered; 
+					return self.done(nodes || r) || nodes || r;
+				return nodes || r; 
 			})
 			.fail(function  (error) {
 				console.log("Error while rendering : ", error);
