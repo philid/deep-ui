@@ -161,17 +161,13 @@ var obj = {
      self:{
         what:"first::#../../datas",
         how:"swig::./templates/simple.html",
-        where:function(rendered){
-            return $(rendered).appendTo("#content-container");
-        },
+        where:deep.ui.htmlOf("#content-container"),
         done:function(nodes){
             $(nodes).click(function(e){ e.preventDefault();  console.log("click"); })
         }
      }
   }
 }
-
-
 deep(obj).flatten().load().run('refresh');
 
 //_______________________________________________
@@ -181,19 +177,14 @@ var a = [{names:"john"},{names:"janis"},{names:"jim"}];
 deep(a)
 .query("./*")
 .render({
-    //what:"first::#./!",
     how:"swig::./templates/simple.html",
-    where:function(rendered){
-      return $(rendered).appendTo("#content-container");
-    },
+    where:deep.ui.appendTo("#content-container"),
     done:function(nodes){
-        $(nodes).click( function(e){ 
+        $(nodes).click( function(){ 
             console.log("click"); 
         })
     }
-})
-.log()
-.logValues();
+});
 
 //_______________________________________________
 
@@ -204,9 +195,7 @@ var obj = {
      self:{
         what:"first::#../../datas",
         how:"swig::./templates/simple.html",
-        where:function(rendered){
-            return $(rendered).appendTo("#content-container");
-        },
+        where:deep.ui.appendTo("#content-container"),
         done:function(nodes){
             $(nodes).click( function(e){ 
                 console.log("click"); 
@@ -217,6 +206,32 @@ var obj = {
 }
 
 deep(obj).flatten().run('refresh');
+
+//_______________________________________________
+
+
+var MYVIEW = {
+  datas:{ names:"john" },
+  renderables:{
+     self:{
+        what:"first::#../../datas",
+        how:"swig::./templates/simple.html",
+        where:deep.ui.htmlOf("#content-container"),
+        done:function(nodes){
+            $(nodes).click(function(e){ e.preventDefault();  console.log("click"); })
+        }
+     }
+  }
+}
+
+
+deep(MYVIEW)
+.bottom(deep.ui.ViewController)
+.run("refresh")
+.up({datas:{ names:"gilles"}})
+.run('refresh');
+
+console.log("___________________");
 
 //_______________________________________________
 

@@ -131,6 +131,39 @@ define(function (require){
 		}
 	}
 	deep.ui = {
+		appendTo:function (selector) {
+			return function(rendered, nodes){
+	            if(nodes)
+	            {
+	                var newNodes = $(rendered);
+	                $(nodes).replaceWith(newNodes);
+	                return newNodes;
+	            }
+	            return $(rendered).appendTo(selector);
+	        }
+		},
+		prependTo:function (selector) {
+			return function(rendered, nodes){
+	            if(nodes)
+	            {
+	                var newNodes = $(rendered);
+	                $(nodes).replaceWith(newNodes);
+	                return newNodes;
+	            }
+	            return $(rendered).prependTo(selector);
+	        }
+		},
+		htmlOf:function (selector) {
+			return function(rendered, nodes){
+	            if(nodes)
+	            {
+	                var newNodes = $(rendered);
+	                $(nodes).replaceWith(newNodes);
+	                return newNodes;
+	            }
+	            return $(selector).empty().html(rendered);
+	        }
+		},
 		ViewController:VC,
 		AppController:AC,
 		refreshRenderable : function (context, useContextAsDefaultWhat) 
@@ -161,7 +194,7 @@ define(function (require){
 				try{
 					self.rendered = how(what);
 					if(where)
-						self.nodes = where(self.rendered);
+						self.nodes = where(self.rendered, self.nodes);
 				}
 				catch(e){
 					console.log("Error while rendering : ", e);

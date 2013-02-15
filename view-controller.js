@@ -108,7 +108,7 @@ define(function (require)
 			.run("placeInDOM")
 			.query("./renderables/*")
 			.run(deep.ui.refreshRenderable)
-			.root()
+			.root(self)
 			.run(function () {
 				if(self.deepLinkPath)
 					_APP.updateDeepLink(self.deepLinkPath);
