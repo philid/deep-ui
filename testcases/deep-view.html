@@ -152,23 +152,7 @@
 		printReport("view-controller", success, failed, count);
 	})
 
-//_______________________________________________________________
 
-var obj = {
-  backgrounds:[deep.ui.ViewController],
-  datas:{ names:"john" },
-  renderables:{
-     self:{
-        what:"first::#../../datas",
-        how:"swig::./templates/simple.html",
-        where:deep.ui.htmlOf("#content-container"),
-        done:function(nodes){
-            $(nodes).click(function(e){ e.preventDefault();  console.log("click"); })
-        }
-     }
-  }
-}
-deep(obj).flatten().load().run('refresh');
 
 //_______________________________________________
 
