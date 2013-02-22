@@ -7,6 +7,7 @@ define(function (require){
 	var deep = require("deep/deep");
 	var VC = require("deep-ui/view-controller");
 	var AC = require("deep-ui/app-controller");
+	var Binder = require("deep-ui/inputs-data-binder");
 
 	var layer = {
 		prototype:{
@@ -90,7 +91,7 @@ define(function (require){
 			databind:function (parentSelector, options) {
 				var self = this;
 				var func = function  (s,e) {
-					
+					//var binder = new Binder(parentSelector, self.entries[0], schema)
 					self.running = false;
 					deep.chain.nextQueueItem.apply(self, [true, null]);
 				}
@@ -131,9 +132,9 @@ define(function (require){
 		}
 	}
 	deep.ui = {
-		appendTo:function (selector) {
+		appendTo:function (selector, force) {
 			return function(rendered, nodes){
-	            if(nodes)
+	            if(!force && nodes)
 	            {
 	                var newNodes = $(rendered);
 	                $(nodes).replaceWith(newNodes);
@@ -142,15 +143,22 @@ define(function (require){
 	            return $(rendered).appendTo(selector);
 	        }
 		},
-		prependTo:function (selector) {
+		prependTo:function (selector, force) {
 			return function(rendered, nodes){
-	            if(nodes)
+	            if(!force && nodes)
 	            {
 	                var newNodes = $(rendered);
 	                $(nodes).replaceWith(newNodes);
 	                return newNodes;
 	            }
 	            return $(rendered).prependTo(selector);
+	        }
+		},
+		replace:function (selector) {
+			return function(rendered, nodes){
+	            var newNodes = $(rendered);
+	            $(selector).replaceWith(newNodes);
+	            return newNodes;
 	        }
 		},
 		htmlOf:function (selector) {
@@ -166,6 +174,7 @@ define(function (require){
 		},
 		ViewController:VC,
 		AppController:AC,
+		Binder:Binder,
 		refreshRenderable : function (context, useContextAsDefaultWhat, dontKeepNodes) 
 		{
 			if(!this.how || this.condition === false)
@@ -201,19 +210,19 @@ define(function (require){
 				catch(e){
 					console.log("Error while rendering : ", e);
 					if(typeof self.fail === 'function')
-						return self.fail(e) || e;
+						return self.fail.apply(context, [e]) || e;
 					return e;
 				}
 				if(!dontKeepNodes)
 					self.nodes = nodes;
 				if(typeof self.done === "function")
-					return self.done(nodes || r) || nodes || r;
+					return self.done.apply(context, [nodes || r]) || nodes || r;
 				return nodes || r; 
 			})
 			.fail(function  (error) {
 				console.log("Error while rendering : ", error);
 				if(typeof self.fail === 'function')
-					return self.fail(error) || error;
+					return self.fail.apply(context, [error]) || error;
 				return error;
 			})
 		}

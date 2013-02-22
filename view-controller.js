@@ -107,7 +107,7 @@ define(function (require)
 			.run("render")
 			.run("placeInDOM")
 			.query("./renderables/*")
-			.run(deep.ui.refreshRenderable)
+			.run(deep.ui.refreshRenderable, {args:[self,true,false]})
 			.root(self)
 			.run(function () {
 				if(self.deepLinkPath)
