@@ -133,10 +133,14 @@ define(function (require){
 		}
 	}
 	deep.ui = {
+<<<<<<< HEAD
 		swig:function (string) {
 			return swig.compile(string);
 		},
 		appendTo:function (selector) {
+=======
+		appendTo:function (selector, force) {
+>>>>>>> 961718666aee9a46d174e348dae50f0774439390
 			return function(rendered, nodes){
 	            if(!force && nodes)
 	            {
@@ -178,11 +182,15 @@ define(function (require){
 		},
 		ViewController:VC,
 		AppController:AC,
-		Binder:Binder,
+<<<<<<< HEAD
 		render:function (renderable, context) {
 			return deep.ui.refreshRenderable.apply(renderable, [context || {}, true]);
 		},
 		refreshRenderable : function (context, dontKeepNodes) 
+=======
+		Binder:Binder,
+		refreshRenderable : function (context, useContextAsDefaultWhat, dontKeepNodes) 
+>>>>>>> 961718666aee9a46d174e348dae50f0774439390
 		{
 			if(!this.how || this.condition === false)
 				return false;
