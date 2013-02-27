@@ -1,5 +1,6 @@
 if(typeof define !== 'function'){
 	var define = require('amdefine')(module);
+	var swig = require("swig");
 }
 
 define(function (require){
@@ -105,7 +106,7 @@ define(function (require){
 					if(renderable)
 					{
 						self._entries.forEach(function (entry) {
-							alls.push(deep.ui.refreshRenderable.apply(renderable, [entry, true, true]));
+							alls.push(deep.ui.refreshRenderable.apply(renderable, [entry, true]));
 						});
 					}
 					else
@@ -131,6 +132,9 @@ define(function (require){
 		}
 	}
 	deep.ui = {
+		swig:function (string) {
+			return swig.compile(string);
+		},
 		appendTo:function (selector) {
 			return function(rendered, nodes){
 	            if(nodes)
@@ -166,7 +170,10 @@ define(function (require){
 		},
 		ViewController:VC,
 		AppController:AC,
-		refreshRenderable : function (context, useContextAsDefaultWhat, dontKeepNodes) 
+		render:function (renderable, context) {
+			return deep.ui.refreshRenderable.apply(renderable, [context || {}, true]);
+		},
+		refreshRenderable : function (context, dontKeepNodes) 
 		{
 			if(!this.how || this.condition === false)
 				return false;
@@ -186,7 +193,7 @@ define(function (require){
 
 			return deep.all(objs)
 			.done(function (results) {
-				var what = (self.what)?results.shift():((useContextAsDefaultWhat)?context:{});
+				var what = (self.what)?results.shift():context;
 				if(what._isDQ_NODE_)
 					what = what.value;
 				var how = (typeof self.how === "string")?results.shift():self.how;
@@ -198,7 +205,8 @@ define(function (require){
 					if(where)
 						nodes = where(r, nodes);
 				}
-				catch(e){
+				catch(e)
+				{
 					console.log("Error while rendering : ", e);
 					if(typeof self.fail === 'function')
 						return self.fail(e) || e;

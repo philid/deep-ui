@@ -3,10 +3,193 @@
  */
 /*
 For client use only (need jquery)
+
+	deep
+	.store("store.rest::/Discipline/")
+	.query("/brol")
+	.render(...)
+	.bind(...)
+	
+	ViewController.prototype.preload
+
+binding type : 
+	data-path
+	html_to_json
+	data-item
+
+// case  :you have a bunch of item, identicaly renderable and bindable
+
+
+	deep(...)
+	.query("...")
+	.render({
+		how:"",
+		where:"",
+		bind:{
+			type:"data-path",		// default
+			errorHandler:function ($nodes, binder) {
+				// manage entry error
+			},
+			done:function  (argument) {
+				// body...
+			}
+		},
+		done:function ($nodes, injected, binder) {
+			// 'this' here mean the context from where the rendering is done (by default the same as injected)
+			// add behaviour
+		}
+	})
+	.done:function ($nodes) {
+		// add submit behaviour : return promise of submition : so the post (next chaining) will be fired on submition
+	}
+	.post()
+
+//_______________________________________________________
+
+case : you have an already constructed form (or bunch of inputs) somewhere in DOM, and you want to bind it without rendering (it's already done)
+
+	deep({ name:"ced" })
+	.bind("#form-contact", {
+		type:"data-path",		// default
+		errorHandler:function ($nodes, binder) {
+			// manage errors
+		},
+		done:function ($nodes, ) {
+			// add behaviour
+		}
+	})
+	.done(function (binder) {
+		var def = deep.Deferred();
+		var self = this;
+		nodes.find("...").click(function (argument) {
+			var report = binder.validate();
+			if(report.valid)
+				def.resolve(report.value);
+		});
+		return deep.promise(def);
+	})
+	.post(...)
+
+
+	dans _deep_entry : stocker le binder
+	
+
+//_______________________________________
+
+
+protocole : app::
+
+si on a plusieurs app : on peut seter un truc genre :
+
+deep.request.protocole("app2", {
+	parse:function (request) {
+		// body...
+	},
+	get:function (argument) {
+		// body...
+	}
+})
+
+ou
+
+deep.request.protocole.app("app2", monApp)
+
+//________________________________________________
+
+
+d'ailleurs : 
+deep(deep.request).up({
+	protocoles:{
+		json:{
+			parse:function (protocoleInfos, request) {
+				return deep.request.parser(request).uri(false).deeprql(false)
+			},
+			get:function (parsed) {
+				return $.ajax(...)
+			}
+		},
+		"json.range":{
+			parse:function (protocoleInfos, request) {
+				return deep.request.parser(request).uri(false).deeprql(false)
+			},
+			get:function (parsed) {
+				return $.ajax(...)
+			}
+		}
+	}
+})
+
+deep.request.protocole(["app2"], {
+	parse:function (protocoleInfos, request) {
+		return deep.request.parser.rql(request)
+	},
+	get:function (parsed) {
+		
+	}
+});
+
+deep.request.protocole(["app","rss"], {
+	parse:function (protocoleInfos, request) {
+		return deep.request.parser.rql(request)
+	},
+	get:function (parsed) {
+		
+	}
+
+});
+
+//____________________
+
+pas de deep.request(...)
+puisque :
+deep(...).chain
+
+et deep.request.all().chain
+deep.request.json()
+deep.request.range() ...
+
+
+
+
+
+//____________________________________
+
+
+
+deep.store("json::/campaign/").query("...").up(...).put()
+
+deep
+.store("json::/campaign/")
+.query("...", { range:... })
+.ui()
+.render(...)
+.bind(...)
+...
+
+
+// set dummies or custom store : 
+deep.store("json::/campaign/", [...])
+
+
+deep.store("json::/campaign/")
+.range(...)
+.done(function (range) {
+	 // e.g. set pager
+}) 
+.render(...)
+.bind(...)
+.done(function (nodes) {
+	
+})
+
+...
+
+deep.ui("...").render().bind()
+
 */
-if(typeof define !== 'function'){
+if(typeof define !== 'function')
 	var define = require('amdefine')(module);
-}
+
 define(function(require){
 
 	console.log("Define of InputsDataBinder");
@@ -344,74 +527,40 @@ define(function(require){
 		var deferred = promise.Deferred();
 		this.toDatas();
 		var othis = this;
-
-	//	if(console.flags["form-controller"]) console.log("form-controller", " will validate : " +JSON.stringify(this.output) + " - with : " + JSON.stringify(this.schema))
-		promise.when(Validator.partialValidation(this.output, this.schema, {fieldsToCheck:fields})).then(function validationDone(report)
-		//promise.when(Validator.partialValidation({ test:1, test2:'hello' }, { properties:{ test:{ type:'number', required:true }, test2:{ type:'string', required:true }}})).then(function validationDone(report)
+		var report = Validator.partialValidation(this.output, this.schema, {fieldsToCheck:fields});
+		if( !report.valid)
 		{
-			//console.log("PURE REPORT : ", report)
-			//console.log("InputsDataBinder : VALIDATION done  : end : pathMap : ", othis.pathMap)
-			//console.log("InputsDataBinder partialValidation : ", othis.pathMap);
-			//console.log("InputsDataBinder partialValidation : ", report);
-
-			//if(console.flags["form-controller"]) 
-			if( !report.valid)
+			for(var i in report.errorsMap)
 			{
-			//	if(console.flags["form-controller"]) 
-				for(var i in report.errorsMap)
-				{
-					//console.log("CYCLE ON ERRORS : key : ", i)
-					//console.log("InputsDataBinder", "errors on validation ", report.errorsMap[i], othis.pathMap[i.substring(1)].entries)
-					var e = report.errorsMap[i];
-					if(othis.pathMap[i])
-						e.itemsMap = othis.pathMap[i].entries;
-					else
-						e.itemsMap = [];
-				}
+				var e = report.errorsMap[i];
+				if(othis.pathMap[i])
+					e.itemsMap = othis.pathMap[i].entries;
+				else
+					e.itemsMap = [];
 			}
-			//console.log("InputsDataBinder", " have validate : ",report)
-
-			deferred.resolve(report);
-		});
-		return promise.promise(deferred);  
+		}
+		return report;
 	}
 
 	InputsDataBinder.prototype.validate = function()
 	{
-		var deferred = promise.Deferred();
 		this.toDatas();
 	//	console.log("VAlidate output : ", this.output, " - ",this.schema);
 		var othis = this;
-
-	//	if(console.flags["form-controller"]) console.log("form-controller", " will validate : " +JSON.stringify(this.output) + " - with : " + JSON.stringify(this.schema))
-		promise.when(Validator.validate(this.output, this.schema)).then(function validationDone(report)
-		//promise.when(Validator.partialValidation({ test:1, test2:'hello' }, { properties:{ test:{ type:'number', required:true }, test2:{ type:'string', required:true }}})).then(function validationDone(report)
+		var report = Validator.validate(this.output, this.schema)
+		if( !report.valid)
 		{
-			//console.log("PURE REPORT : ", report)
-			//console.log("InputsDataBinder : VALIDATION done  : end : pathMap : ", othis.pathMap)
-
-			//if(console.flags["form-controller"]) 
-			if( !report.valid)
+			for(var i in report.errorsMap)
 			{
-			//	if(console.flags["form-controller"]) 
-				for(var i in report.errorsMap)
-				{
-					//console.log("CYCLE ON ERRORS : key : ", i)
-					//console.log("InputsDataBinder", "errors on validation ", report.errorsMap[i], othis.pathMap[i.substring(1)].entries)
-					var e = report.errorsMap[i];
-					if(othis.pathMap[i.substring(1)])
-						e.itemsMap = othis.pathMap[i.substring(1)].entries;
-					else
-						e.itemsMap = [];
-				}
+				var e = report.errorsMap[i];
+				if(othis.pathMap[i.substring(1)])
+					e.itemsMap = othis.pathMap[i.substring(1)].entries;
+				else
+					e.itemsMap = [];
 			}
-			//console.log("InputsDataBinder", " have validate : ",report)
-
-			deferred.resolve(report);
-		});
-		return promise.promise(deferred);  
+		}
+		return report;
 	}
-
 
 
 	//____________________  EXAMPLE OF ERROR MANAGEMENT 
