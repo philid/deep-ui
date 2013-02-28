@@ -237,6 +237,20 @@ define(function (require){
 	}
 	deep.utils.up( layer.prototype, deep.Handler.prototype);
 
+	deep.linker = {
+		addToPath:function (section) {
+			if(section instanceof DeepHandler)
+				section = section._entries[0].value;
+			console.log(" DEEP.LINKER Add TO PATH : ", section)
+		    var old = $.address.path();
+		    if(old[old.length-1] != "/")
+		    	old += "/";
+		    $.address.path(old+section);
+		},
+		setPath:function (path) {
+			$.address.path(path);
+		}		
+	}
 	//console.log("deep after lugin : ", layer)
 
 	return layer;
