@@ -151,6 +151,7 @@ define(["require","deep/deep", "deep-ui/view-controller", "deep-ui/app-controlle
 		},
 		prependTo:function (selector, force) {
 			return function(rendered, nodes){
+				console.log("deep ui plugin PrepentTo");
 	            if(!force && nodes)
 	            {
 	                var newNodes = $(rendered);
@@ -189,7 +190,7 @@ define(["require","deep/deep", "deep-ui/view-controller", "deep-ui/app-controlle
 			if(!this.how || this.condition === false)
 				return false;
 			if(this.condition)
-				if(typeof this.condition === "function" && !this.condition())
+				if(typeof this.condition === "function" && !this.condition.apply(this))
 					return false;
 			context = context || this;
 			var self = this;
@@ -214,7 +215,7 @@ define(["require","deep/deep", "deep-ui/view-controller", "deep-ui/app-controlle
 				var how = (typeof self.how === "string")?results.shift():self.how;
 				var where = (typeof self.where === "string")?results.shift():self.where;
 				var r = "";
-				var nodes = self.nodes;
+				var nodes = self.nodes || null;
 				try{
 					r = how(what);
 					if(where)
@@ -230,7 +231,8 @@ define(["require","deep/deep", "deep-ui/view-controller", "deep-ui/app-controlle
 				if(!dontKeepNodes)
 					self.nodes = nodes;
 				if(typeof self.done === "function")
-					return self.done.apply(context, [nodes || r, what]) || nodes || r;
+					return self.done.apply(context, [nodes, r, what]) || nodes || r;
+
 				return nodes || r; 
 			})
 			.fail(function  (error) {
