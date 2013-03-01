@@ -102,7 +102,7 @@ define(function (require)
 		setBehaviour:deep.compose.createIfNecessary().after(function () {}),
 		refresh:deep.compose.createIfNecessary().after(function () 
 		{
-			var self = this;
+			var controller = this;
 			return deep(this)
 			.run("render")
 			.run("placeInDOM")
@@ -113,7 +113,7 @@ define(function (require)
 				if(this.condition)
 					if(typeof this.condition === "function" && !this.condition.apply(this))
 						return false;
-				var context = self;
+				var context = controller;
 				var self = this;
 				var objs = [];
 				//console.log("view-controller will retrieve : from : ",this._deep_entry)
@@ -127,8 +127,8 @@ define(function (require)
 					objs.push(deep.request.retrieve(this.how, { callFunctions:false, root:context._deep_entry || context, acceptQueryThis:true }));
 				if(typeof this.where === "string")
 					objs.push(deep.request.retrieve(this.where, { callFunctions:false, root:context._deep_entry || context, acceptQueryThis:true }));
-				objs.push(context);
-				objs.push(self);
+				objs.unshift(context);
+				objs.unshift(self);
 				return deep.all(objs)
 				.fail(function(error){
 					console.log("Renderable rendering failed : ", error);
@@ -139,13 +139,13 @@ define(function (require)
 			})
 			.done(function (alls) {
 				alls.forEach(function(results){
+					var self = results.shift();
+					var context = results.shift();
 					var what = (self.what)?results.shift():context;
 					if(what._isDQ_NODE_)
 						what = what.value;
 					var how = (typeof self.how === "string")?results.shift():self.how;
 					var where = (typeof self.where === "string")?results.shift():self.where;
-					var context = results.shift();
-					var self = results.shift();
 					var r = "";
 					var nodes = self.nodes || null;
 					try{
@@ -160,8 +160,8 @@ define(function (require)
 							return self.fail.apply(context, [e]) || e;
 						return e;
 					}
-					if(!dontKeepNodes)
-						self.nodes = nodes;
+					
+					self.nodes = nodes;
 					if(typeof self.done === "function")
 						return self.done.apply(context, [nodes, r, what]) || nodes || r;
 

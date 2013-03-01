@@ -135,7 +135,7 @@ define(["require", "deep/deep", "deep-ui/view-controller", "deep-ui/app-controll
 			options= options || {};
 			return swig.compile(string);
 		},
-		appendTo:function (selector) {
+		appendTo:function (selector, force) {
 			return function(rendered, nodes){
 	            if(!force && nodes)
 	            {
