@@ -3,13 +3,10 @@ if(typeof define !== 'function'){
 	var swig = require("swig");
 }
 
-define(["require","deep/deep", "deep-ui/view-controller", "deep-ui/app-controller", "deep-ui/inputs-data-binder"],
-	function (require){
+define(["require", "deep/deep", "deep-ui/view-controller", "deep-ui/app-controller", "deep-ui/inputs-data-binder"],
+	function (require, deep, VC, AC, Binder){
 	//console.log("PLUGIN LOADED")
-	var deep = require("deep/deep");
-	var VC = require("deep-ui/view-controller");
-	var AC = require("deep-ui/app-controller");
-	var Binder = require("deep-ui/inputs-data-binder");
+	//var deep = require("deep/deep");
 
 	var layer = {
 		prototype:{
@@ -261,6 +258,6 @@ define(["require","deep/deep", "deep-ui/view-controller", "deep-ui/app-controlle
 	}
 	//console.log("deep after lugin : ", layer)
 
-	return layer;
+	return deep;
 
 });

@@ -107,7 +107,67 @@ define(function (require)
 			.run("render")
 			.run("placeInDOM")
 			.query("./renderables/*")
-			.run(deep.ui.refreshRenderable, {args:[self,true,false]})
+			.run(function(){
+				if(!this.how || this.condition === false)
+					return false;
+				if(this.condition)
+					if(typeof this.condition === "function" && !this.condition.apply(this))
+						return false;
+				var context = self;
+				var self = this;
+				var objs = [];
+				//console.log("view-controller will retrieve : from : ",this._deep_entry)
+
+				if(this.what)
+				{
+					this.what = deep.interpret(this.what, context);
+					objs.push(deep.request.retrieve(this.what, { callFunctions:true, root:context._deep_entry || context, acceptQueryThis:true }));
+				}
+				if(typeof this.how === "string")
+					objs.push(deep.request.retrieve(this.how, { callFunctions:false, root:context._deep_entry || context, acceptQueryThis:true }));
+				if(typeof this.where === "string")
+					objs.push(deep.request.retrieve(this.where, { callFunctions:false, root:context._deep_entry || context, acceptQueryThis:true }));
+				objs.push(context);
+				objs.push(self);
+				return deep.all(objs)
+				.fail(function(error){
+					console.log("Renderable rendering failed : ", error);
+					if(typeof self.fail === 'function')
+						return self.fail.apply(context, [error]) || error;
+					return [{}, function(){ return ""; }, function(){} ]
+				})
+			})
+			.done(function (alls) {
+				alls.forEach(function(results){
+					var what = (self.what)?results.shift():context;
+					if(what._isDQ_NODE_)
+						what = what.value;
+					var how = (typeof self.how === "string")?results.shift():self.how;
+					var where = (typeof self.where === "string")?results.shift():self.where;
+					var context = results.shift();
+					var self = results.shift();
+					var r = "";
+					var nodes = self.nodes || null;
+					try{
+						r = how(what);
+						if(where)
+							nodes = where(r, nodes);
+					}
+					catch(e)
+					{
+						console.log("Error while rendering : ", e);
+						if(typeof self.fail === 'function')
+							return self.fail.apply(context, [e]) || e;
+						return e;
+					}
+					if(!dontKeepNodes)
+						self.nodes = nodes;
+					if(typeof self.done === "function")
+						return self.done.apply(context, [nodes, r, what]) || nodes || r;
+
+					return nodes || r; 
+				})
+			})
 			.root(self)
 			.run(function () {
 				if(self.deepLinkPath)

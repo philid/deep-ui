@@ -11,7 +11,7 @@ TO DO :
 if(typeof define !== 'function')
 	var define = require('amdefine')(module);
 
-define(function AppControllerDefine(require){
+define(["require", "deep-ui/view-controller"], function AppControllerDefine(require){
 
 	var deep = require("deep/deep");	
 	var ViewController = require("deep-ui/view-controller");

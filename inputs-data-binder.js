@@ -190,15 +190,8 @@ deep.ui("...").render().bind()
 if(typeof define !== 'function')
 	var define = require('amdefine')(module);
 
-define(function(require){
-
-	console.log("Define of InputsDataBinder");
-	
-	var utils = require("deep/utils");
-    var deepCopy = require("deep/utils").deepCopy;
-    var retrieveFullSchemaByPath = require("deep/utils").retrieveFullSchemaByPath;
-    var promise = require("deep/promise");
-	var Validator = require("deep/deep-schema");
+define( function(require){
+	var deep = require("deep/deep");
 
 	var InputsDataBinder =  function (){
 		console.log("InputsDataBinder Constructor : ", this);
@@ -343,7 +336,7 @@ define(function(require){
 		//console.log("inputs-data-binder", "toDatas() give (before copy old datas): " , JSON.stringify(this.output), " - datas ? ",  JSON.stringify(this.datas))
 		//if(this.editMode)
 		if(this.datas)
-			deepCopy(this.datas, this.output, false);
+			deep.utils.bottom(this.datas, this.output);
 		//if(console.flags["inputs-data-binder"]) 
 			//console.log("inputs-data-binder", "toDatas() give : " + JSON.stringify(this.output))
 		return this.output;
@@ -362,7 +355,7 @@ define(function(require){
 		{
 			//console.log("whats context before retrieve by path : " + JSON.stringify(this.context))
 
-			var value = utils.retrieveValueByPath(this.datas, i);
+			var value = deep.utils.retrieveValueByPath(this.datas, i);
 			var valueIndex = 0;
 			for(var j = 0; j < this.pathMap[i].entries.length; ++j)
 			{
@@ -381,7 +374,7 @@ define(function(require){
 					case "checkbox":
 						if(val == null)
 							break;
-						if($(field.input).val() == val || (val instanceof Array && utils.inArray($(field.input).val(),val)))			// ________________________  TODO : inArray !!!!!
+						if($(field.input).val() == val || (val instanceof Array && deep.utils.inArray($(field.input).val(),val)))			// ________________________  TODO : inArray !!!!!
 							$(field.input).prop("checked", true);
 						//	console.log("fill fields : checkbox case : value assigned : "+$(field.input).val() + " - for "+i);
 
@@ -426,7 +419,7 @@ define(function(require){
 			var path = $(this).attr("data-path");
 			var schem = {};
 			if(othis.schema)
-				schem = retrieveFullSchemaByPath(othis.schema, path);
+				schem = deep.utils.retrieveFullSchemaByPath(othis.schema, path);
 			othis.inputs.push(this);
 		//	console.log("createPathMap : got "+path)
 			var parts = path.split(".");
@@ -456,7 +449,7 @@ define(function(require){
 			var parts = path.split(".");
 			var schem = {};
 			if(othis.schema)
-				schem = retrieveFullSchemaByPath(othis.schema, path);
+				schem = deep.utils.retrieveFullSchemaByPath(othis.schema, path);
 			othis.inputs.push(this);
 			var tmp = obj;
 			while(parts.length > 1)
@@ -479,7 +472,7 @@ define(function(require){
 		$(this.parentSelector + " textarea[data-path]").each(function createTextAreaPathMap(){
 			var path = $(this).attr("data-path");
 			if(othis.schema)
-				schem = retrieveFullSchemaByPath(othis.schema, path);
+				schem = deep.utils.retrieveFullSchemaByPath(othis.schema, path);
 			othis.inputs.push(this);
 			var parts = path.split(".");
 			var tmp = obj;
@@ -524,10 +517,9 @@ define(function(require){
 
 	InputsDataBinder.prototype.partialValidation = function(fields)
 	{
-		var deferred = promise.Deferred();
 		this.toDatas();
 		var othis = this;
-		var report = Validator.partialValidation(this.output, this.schema, {fieldsToCheck:fields});
+		var report = deep.partialValidation(this.output, this.schema, {fieldsToCheck:fields});
 		if( !report.valid)
 		{
 			for(var i in report.errorsMap)
@@ -547,7 +539,7 @@ define(function(require){
 		this.toDatas();
 	//	console.log("VAlidate output : ", this.output, " - ",this.schema);
 		var othis = this;
-		var report = Validator.validate(this.output, this.schema)
+		var report = deep.validate(this.output, this.schema)
 		if( !report.valid)
 		{
 			for(var i in report.errorsMap)
