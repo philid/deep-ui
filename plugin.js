@@ -149,6 +149,7 @@ define(function (require){
 		},
 		prependTo:function (selector, force) {
 			return function(rendered, nodes){
+				console.log("deep ui plugin PrepentTo");
 	            if(!force && nodes)
 	            {
 	                var newNodes = $(rendered);
@@ -187,14 +188,18 @@ define(function (require){
 			if(!this.how || this.condition === false)
 				return false;
 			if(this.condition)
-				if(typeof this.condition === "function" && !this.condition())
+				if(typeof this.condition === "function" && !this.condition.apply(this))
 					return false;
 			context = context || this;
 			var self = this;
 			var objs = [];
 			//console.log("view-controller will retrieve : from : ",this._deep_entry)
+
 			if(this.what)
+			{
+				this.what = deep.interpret(this.what, context);
 				objs.push(deep.request.retrieve(this.what, { callFunctions:true, root:context._deep_entry || context, acceptQueryThis:true }));
+			}
 			if(typeof this.how === "string")
 				objs.push(deep.request.retrieve(this.how, { callFunctions:false, root:context._deep_entry || context, acceptQueryThis:true }));
 			if(typeof this.where === "string")
@@ -208,7 +213,7 @@ define(function (require){
 				var how = (typeof self.how === "string")?results.shift():self.how;
 				var where = (typeof self.where === "string")?results.shift():self.where;
 				var r = "";
-				var nodes = self.nodes;
+				var nodes = self.nodes || null;
 				try{
 					r = how(what);
 					if(where)
@@ -224,7 +229,7 @@ define(function (require){
 				if(!dontKeepNodes)
 					self.nodes = nodes;
 				if(typeof self.done === "function")
-					return self.done.apply(context, [nodes || r]) || nodes || r;
+					return self.done.apply(context, [nodes, r, what]) || nodes || r;
 				return nodes || r; 
 			})
 			.fail(function  (error) {
