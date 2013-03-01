@@ -3,7 +3,8 @@ if(typeof define !== 'function'){
 	var swig = require("swig");
 }
 
-define(function (require){
+define(["require","deep/deep", "deep-ui/view-controller", "deep-ui/app-controller", "deep-ui/inputs-data-binder"],
+	function (require){
 	//console.log("PLUGIN LOADED")
 	var deep = require("deep/deep");
 	var VC = require("deep-ui/view-controller");
@@ -133,7 +134,8 @@ define(function (require){
 		}
 	}
 	deep.ui = {
-		swig:function (string) {
+		swig:function (string, options) {
+			options= options || {};
 			return swig.compile(string);
 		},
 		appendTo:function (selector) {
