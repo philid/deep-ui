@@ -230,6 +230,7 @@ define(function (require){
 					self.nodes = nodes;
 				if(typeof self.done === "function")
 					return self.done.apply(context, [nodes, r, what]) || nodes || r;
+
 				return nodes || r; 
 			})
 			.fail(function  (error) {
