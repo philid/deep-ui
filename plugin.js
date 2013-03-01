@@ -193,8 +193,12 @@ define(function (require){
 			var self = this;
 			var objs = [];
 			//console.log("view-controller will retrieve : from : ",this._deep_entry)
+
 			if(this.what)
+			{
+				this.what = deep.interpret(this.what, context);
 				objs.push(deep.request.retrieve(this.what, { callFunctions:true, root:context._deep_entry || context, acceptQueryThis:true }));
+			}
 			if(typeof this.how === "string")
 				objs.push(deep.request.retrieve(this.how, { callFunctions:false, root:context._deep_entry || context, acceptQueryThis:true }));
 			if(typeof this.where === "string")
@@ -224,7 +228,7 @@ define(function (require){
 				if(!dontKeepNodes)
 					self.nodes = nodes;
 				if(typeof self.done === "function")
-					return self.done.apply(context, [nodes || r]) || nodes || r;
+					return self.done.apply(context, [nodes || r, what]) || nodes || r;
 				return nodes || r; 
 			})
 			.fail(function  (error) {
