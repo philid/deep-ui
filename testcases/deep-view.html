@@ -163,8 +163,8 @@ deep(a)
 .render({
     how:"swig::./templates/simple.html",
     where:deep.ui.appendTo("#content-container"),
-    done:function(nodes){
-        $(nodes).click( function(){ 
+    done:function($nodes){
+        $nodes.click( function(){ 
             console.log("click"); 
         })
     }
@@ -175,13 +175,15 @@ deep(a)
 var obj = {
   backgrounds:[ deep.ui.ViewController ],
   datas:{ names:"john" },
+  externals:{
+  		brol:"json::brol.json"
+  },
   renderables:{
-     self:{
-        what:"first::#../../datas",
+     brol:{
         how:"swig::./templates/simple.html",
         where:deep.ui.appendTo("#content-container"),
-        done:function(nodes){
-            $(nodes).click( function(e){ 
+        done:function($nodes){
+            $nodes.click( function(e){ 
                 console.log("click"); 
             })
         }
@@ -189,7 +191,7 @@ var obj = {
   }
 }
 
-deep(obj).flatten().run('refresh');
+deep(obj).flatten().load().run('refresh');
 
 //_______________________________________________
 
@@ -198,7 +200,7 @@ var MYVIEW = {
   datas:{ names:"john" },
   renderables:{
      self:{
-        what:"first::#../../datas",
+        what:"first::#./datas",
         how:"swig::./templates/simple.html",
         where:deep.ui.htmlOf("#content-container"),
         done:function(nodes){
