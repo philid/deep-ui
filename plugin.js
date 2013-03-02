@@ -105,7 +105,7 @@ define(["require", "deep/deep", "deep-ui/view-controller", "deep-ui/app-controll
 					if(renderable)
 					{
 						self._entries.forEach(function (entry) {
-							alls.push(deep.ui.refreshRenderable.apply(renderable, [entry, true]));
+							alls.push(deep.ui.applyRenderable.apply(renderable, [entry]));
 						});
 					}
 					else
@@ -137,7 +137,7 @@ define(["require", "deep/deep", "deep-ui/view-controller", "deep-ui/app-controll
 		},
 		appendTo:function (selector, force) {
 			return function(rendered, nodes){
-	            if(!force && nodes)
+	            if(!force && nodes && nodes.parents('html').length > 0)
 	            {
 	                var newNodes = $(rendered);
 	                $(nodes).replaceWith(newNodes);
@@ -148,8 +148,7 @@ define(["require", "deep/deep", "deep-ui/view-controller", "deep-ui/app-controll
 		},
 		prependTo:function (selector, force) {
 			return function(rendered, nodes){
-				console.log("deep ui plugin PrepentTo");
-	            if(!force && nodes)
+	            if(!force && nodes && nodes.parents('html').length > 0)
 	            {
 	                var newNodes = $(rendered);
 	                $(nodes).replaceWith(newNodes);
@@ -180,9 +179,9 @@ define(["require", "deep/deep", "deep-ui/view-controller", "deep-ui/app-controll
 		AppController:AC,
 		Binder:Binder,
 		render:function (renderable, context) {
-			return deep.ui.refreshRenderable.apply(renderable, [context || {}, true]);
+			return deep.ui.applyRenderable.apply(renderable, [context || {}]);
 		},
-		refreshRenderable : function (context, dontKeepNodes) 
+		applyRenderable : function (context) 
 		{
 			if(!this.how || this.condition === false)
 				return false;
@@ -196,14 +195,20 @@ define(["require", "deep/deep", "deep-ui/view-controller", "deep-ui/app-controll
 
 			if(this.what)
 			{
-				this.what = deep.interpret(this.what, context);
+				if(typeof this.what === 'string')
+					this.what = deep.interpret(this.what, context);
 				objs.push(deep.request.retrieve(this.what, { callFunctions:true, root:context._deep_entry || context, acceptQueryThis:true }));
 			}
 			if(typeof this.how === "string")
+			{
+				this.how = deep.interpret(this.how, context);
 				objs.push(deep.request.retrieve(this.how, { callFunctions:false, root:context._deep_entry || context, acceptQueryThis:true }));
+			}	
 			if(typeof this.where === "string")
+			{
+				this.where = deep.interpret(this.where, context);
 				objs.push(deep.request.retrieve(this.where, { callFunctions:false, root:context._deep_entry || context, acceptQueryThis:true }));
-
+			}	
 			return deep.all(objs)
 			.done(function (results) {
 				var what = (self.what)?results.shift():context;
@@ -225,10 +230,10 @@ define(["require", "deep/deep", "deep-ui/view-controller", "deep-ui/app-controll
 						return self.fail.apply(context, [e]) || e;
 					return e;
 				}
-				if(!dontKeepNodes)
-					self.nodes = nodes;
+				//if(!dontKeepNodes)
+				//	self.nodes = nodes;
 				if(typeof self.done === "function")
-					return self.done.apply(context, [nodes, r, what]) || nodes || r;
+					return self.done.apply(context, [nodes, r, what]) || [nodes, r, what];
 
 				return nodes || r; 
 			})
@@ -256,8 +261,38 @@ define(["require", "deep/deep", "deep-ui/view-controller", "deep-ui/app-controll
 			$.address.path(path);
 		}		
 	}
+/*
+	deep(deep.request).up({
+		post:function  (uri, object, options) 
+		{
+			console.log("POST from deep-ui-plugin")
+			
+			var headers = {};
+			//this.setRequestHeaders(options, headers);
+			//console.log("HEADER  : ", headers )
+			var postRequest= HTTPrequest({
+					method: "POST",
+					url:uri,
+					body: JSON.stringify(object),
+					headers: headers
+				});
+			
+			return deep.when( postRequest )
+				.done( function (results) {
+					return results
+				})
+				.fail( function  (error) {
+					console.log("error (remote HTTP call failed) while calling remote-services on autobhan post plugin : ", error);
+					return error;
+				});
+		},
+		put:function ( uri, object, options) 
+		{
+			console.log("put from autobahn-plugin")
+		}
+	})
 	//console.log("deep after lugin : ", layer)
-
+**/
 	return deep;
 
 });
