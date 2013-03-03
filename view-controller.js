@@ -72,7 +72,9 @@ define(function (require)
 				return ($(this.domSelectors.self).length() > 0);
 			return null;
 		}),*/
-		setBehaviour:deep.compose.createIfNecessary().after(function () {}),
+		setBehaviour:function () {
+			//console.log("default setbehaviour")
+		},
 		refresh:deep.compose.createIfNecessary().after(function () 
 		{
 			var controller = this;

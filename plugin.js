@@ -166,13 +166,9 @@ define(["require", "deep/deep", "deep-ui/view-controller", "deep-ui/app-controll
 		},
 		htmlOf:function (selector) {
 			return function(rendered, nodes){
-	            if(nodes)
-	            {
-	                var newNodes = $(rendered);
-	                $(nodes).replaceWith(newNodes);
-	                return newNodes;
-	            }
-	            return $(selector).empty().html(rendered);
+				 var newNodes = $(rendered);
+	            $(selector).empty()
+	            return newNodes.appendTo(selector);
 	        }
 		},
 		ViewController:VC,
