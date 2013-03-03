@@ -2,51 +2,24 @@ if(typeof define !== 'function')
 	var define = require('amdefine')(module);
 /*
 	Render pattern : 
-	extrnals:{
+	externals:{
 	
 	},
-	shrom :
-	{
-		what:"#../externals",
-		how:"swig::./templates/simple.html",
-		where:"dom.append::#id",
-		condition:true,
-		done:deep.compose.after(function(success){
-			
-		}),
-		fail:deep.compose.after(function(error){
-			
-		})
+	renderables :{
+		myview:{
+			what:"#./externals",
+			how:"swig::./templates/simple.html",
+			where:deep.ui.appendTo("#myid"),
+			condition:true,
+			done:deep.compose.after(function(success){
+				
+			}),
+			fail:deep.compose.after(function(error){
+				
+			})
+		}, 
+		myotherview:....
 	}
-
-
-	reloadables : 
-		deep.request.reloadables("uri"||Ereg, true||false);
-		
-
-	request :
-		keep cache : 
-			swig::./templates/simple.html should be cached
-			dom.append::#id 		also cached
-			json::/campaign/   should not be cached
-
-		protocole 
-			requestHeaders
-			responseHeaders
-			requestParser
-			responseParser
-
-		json|json.range :
-			requestParser : 
-				path #deep.query 
-
-		html : 
-			requestParser : 
-				path
-
-		dom.* :
-			requestParser : 
-				jquery.selector
 */
 define(function (require)
 {
@@ -57,22 +30,22 @@ define(function (require)
 
 		},
 		parentController:null,
-		domSelectors:null,
+		//domSelectors:null,
 		externals:null,
 		reloadables:null,
-		templates:null,
-		translations:null,
+		//templates:null,
+		//translations:null,
 		load:deep.compose.createIfNecessary().after(function(arg) 
 		{
 			this.reloadables = {};
 			if(this._reloadables)
 				deep.utils.up(this._reloadables, this.reloadables);
-			if(this.loaded)
+			if(this.loaded)	
 				return deep(this).query("./reloadables").deepInterpret(this).deepLoad();
 			this.loaded = true;
-			return  deep(this).query("./[externals,templates,translations,reloadables]").deepInterpret(this).deepLoad();
+			return  deep(this).query("./[externals,reloadables]").deepInterpret(this).deepLoad();
 		}),
-		render:deep.compose.createIfNecessary().after(function () 
+		/*render:deep.compose.createIfNecessary().after(function () 
 		{
 			if(!this.rendered)
 				this.rendered = {};
@@ -98,16 +71,15 @@ define(function (require)
 			if(this.domSelectors.self)
 				return ($(this.domSelectors.self).length() > 0);
 			return null;
-		}),
+		}),*/
 		setBehaviour:deep.compose.createIfNecessary().after(function () {}),
 		refresh:deep.compose.createIfNecessary().after(function () 
 		{
 			var controller = this;
+			var args = Array.prototype.slice.call(arguments).join(",");
 			return deep(this)
 			.position("controller")
-			.run("render")
-			.run("placeInDOM")
-			.query("./renderables/["+Array.prototype.slice.call(arguments).join(",")+"]")
+			.query("./renderables/["+args+"]")
 			.run(function() // load renderables
 			{
 				if(!this.how || this.condition === false)
@@ -180,6 +152,7 @@ define(function (require)
 				if(this.deepLinkPath)
 					_APP.updateDeepLink(this.deepLinkPath);
 			})
+			.log("____________________________________________________________________ refreshed")
 			.run("setBehaviour");
 		})
 	}
