@@ -257,9 +257,9 @@ define(["require", "deep/deep", "deep-ui/view-controller", "deep-ui/app-controll
 			$.address.path(path);
 		}		
 	}
-/*
+
 	deep(deep.request).up({
-		post:function  (uri, object, options) 
+		/*post:function  (uri, object, options) 
 		{
 			console.log("POST from deep-ui-plugin")
 			
@@ -285,10 +285,10 @@ define(["require", "deep/deep", "deep-ui/view-controller", "deep-ui/app-controll
 		put:function ( uri, object, options) 
 		{
 			console.log("put from autobahn-plugin")
-		}
+		}*/
 	})
 	//console.log("deep after lugin : ", layer)
-**/
+
 	return deep;
 
 });

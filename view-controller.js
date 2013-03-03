@@ -121,6 +121,8 @@ define(function (require)
 			{ 
 				alls.forEach(function( results )
 				{
+					if(results == false)
+						return;
 					var renderable = results.shift();
 					var context = controller;
 					var what = (renderable.what)?results.shift():context;
