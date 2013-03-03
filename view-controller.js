@@ -73,12 +73,16 @@ define(function (require)
 		setBehaviour:function () {
 			//console.log("default setbehaviour")
 		},
+		beforeRefresh:function () {
+			//console.log("default setbehaviour")
+		},
 		refresh:deep.compose.createIfNecessary().after(function () 
 		{
 			var controller = this;
 			var args = Array.prototype.slice.call(arguments).join(",");
 			return deep(this)
 			.position("controller")
+			.run("beforeRefresh")
 			.query("./renderables/["+args+"]")
 			.run(function() // load renderables
 			{
