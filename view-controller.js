@@ -37,13 +37,11 @@ define(function (require)
 		//translations:null,
 		load:deep.compose.createIfNecessary().after(function(arg) 
 		{
-			this.reloadables = {};
-			if(this._reloadables)
-				deep.utils.up(this._reloadables, this.reloadables);
-			if(this.loaded)	
-				return deep(this).query("./reloadables").deepInterpret(this).deepLoad();
-			this.loaded = true;
-			return  deep(this).query("./[externals,reloadables]").deepInterpret(this).deepLoad();
+			if(this._externals)
+				this.externals = deep.utils.copy(this._externals);
+			else if(this.externals)
+				this._externals = deep.utils.copy(this.externals);
+			return  deep(this).query("./externals").deepInterpret(this).deepLoad();
 		}),
 		/*render:deep.compose.createIfNecessary().after(function () 
 		{
@@ -156,7 +154,7 @@ define(function (require)
 				if(this.deepLinkPath)
 					_APP.updateDeepLink(this.deepLinkPath);
 			})
-			.log("____________________________________________________________________ refreshed")
+			//.log("____________________________________________________________________ refreshed")
 			.run("setBehaviour");
 		})
 	}

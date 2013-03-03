@@ -101,6 +101,11 @@ define(["require", "deep-ui/view-controller"], function AppControllerDefine(requ
 						//console.log("Got an integer", current);
 					}
 				}
+				else if(currentMapEntry._id_)
+				{
+					currentMapEntry = currentMapEntry._id_
+					ok = true;
+				}
 				else
 				{
 					//other possible cases
@@ -118,7 +123,10 @@ define(["require", "deep-ui/view-controller"], function AppControllerDefine(requ
 			else
 			{
 				//console.log(" will open the default page");
-				currentMapEntry.defaultHandler.apply(this);
+				if(currentMapEntry.defaultHandler)
+					currentMapEntry.defaultHandler.apply(this);
+				else
+					console.log("deep-link failed : nothing to do with : ", urlParams);
 			}
 
 		}
