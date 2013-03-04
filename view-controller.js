@@ -94,12 +94,17 @@ define(function (require)
 				var context = controller;
 				var renderable = this;
 				var objs = [];
-				if(this.what)
+			
+				if(typeof this.what === 'string')
 				{
-					if(typeof this.what === 'string')
-						this.what = deep.interpret(this.what, context);
-					objs.push(deep.request.retrieve(this.what, { callFunctions:true, root:context._deep_entry || context, acceptQueryThis:true }));
+					this.what = deep.interpret(this.what, context);
+					objs.push(deep.request.retrieve(this.what, { callFunctions:false, root:context._deep_entry || context, acceptQueryThis:true }));
 				}
+				else if(typeof this.what === 'function')
+				{
+					objs.push(this.what.apply(controller));
+				}
+				
 				if(typeof this.how === "string")
 				{
 					this.how = deep.interpret(this.how, context);

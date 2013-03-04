@@ -16,6 +16,9 @@ define(function(require){
 		inArray:function(input, array){
 			return utils.inArray(input, array);
 		},
+		outArray:function(input, array){
+			return !utils.inArray(input, array);
+		},
 		notnull : function(input) {
 			if(input == null || input == "null")
 				return "";

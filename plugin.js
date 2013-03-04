@@ -189,11 +189,14 @@ define(["require", "deep/deep", "deep-ui/view-controller", "deep-ui/app-controll
 			var objs = [];
 			//console.log("view-controller will retrieve : from : ",this._deep_entry)
 
-			if(this.what)
+			if(typeof this.what === 'string')
 			{
-				if(typeof this.what === 'string')
-					this.what = deep.interpret(this.what, context);
-				objs.push(deep.request.retrieve(this.what, { callFunctions:true, root:context._deep_entry || context, acceptQueryThis:true }));
+				this.what = deep.interpret(this.what, context);
+				objs.push(deep.request.retrieve(this.what, { callFunctions:false, root:context._deep_entry || context, acceptQueryThis:true }));
+			}
+			else if(typeof this.what === 'function')
+			{
+				objs.push(this.what.apply(controller));
 			}
 			if(typeof this.how === "string")
 			{
