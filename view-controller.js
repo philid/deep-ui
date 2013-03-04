@@ -96,7 +96,7 @@ define(function (require)
 				var objs = [];
 				if(this.what)
 				{
-					console.log("view controller . render : what : ", this.what)
+					//console.log("view controller . render : what : ", this.what)
 					if(typeof this.what === 'string')
 					{
 					 	var what = deep.interpret(this.what, context);
