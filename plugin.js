@@ -191,22 +191,24 @@ define(["require", "deep/deep", "deep-ui/view-controller", "deep-ui/app-controll
 
 			if(typeof this.what === 'string')
 			{
-				this.what = deep.interpret(this.what, context);
-				objs.push(deep.request.retrieve(this.what, { callFunctions:false, root:context._deep_entry || context, acceptQueryThis:true }));
+				var  what = deep.interpret(this.what, context);
+				objs.push(deep.request.retrieve(what, { root:context._deep_entry || context, acceptQueryThis:true }));
 			}
 			else if(typeof this.what === 'function')
 			{
 				objs.push(this.what.apply(controller));
 			}
+			else if(this.what) objs.push(this.what);
+
 			if(typeof this.how === "string")
 			{
-				this.how = deep.interpret(this.how, context);
-				objs.push(deep.request.retrieve(this.how, { callFunctions:false, root:context._deep_entry || context, acceptQueryThis:true }));
+				var how = deep.interpret(this.how, context);
+				objs.push(deep.request.retrieve(how, { root:context._deep_entry || context, acceptQueryThis:true }));
 			}	
 			if(typeof this.where === "string")
 			{
-				this.where = deep.interpret(this.where, context);
-				objs.push(deep.request.retrieve(this.where, { callFunctions:false, root:context._deep_entry || context, acceptQueryThis:true }));
+				var where = deep.interpret(this.where, context);
+				objs.push(deep.request.retrieve(where, { root:context._deep_entry || context, acceptQueryThis:true }));
 			}	
 			return deep.all(objs)
 			.done(function (results) {

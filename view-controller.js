@@ -94,26 +94,31 @@ define(function (require)
 				var context = controller;
 				var renderable = this;
 				var objs = [];
-			
-				if(typeof this.what === 'string')
+				if(this.what)
 				{
-					this.what = deep.interpret(this.what, context);
-					objs.push(deep.request.retrieve(this.what, { callFunctions:false, root:context._deep_entry || context, acceptQueryThis:true }));
+					console.log("view controller . render : what : ", this.what)
+					if(typeof this.what === 'string')
+					{
+					 	var what = deep.interpret(this.what, context);
+						objs.push(deep.request.retrieve(what, { callFunctions:false, root:context._deep_entry || context, acceptQueryThis:true }));
+					}
+					else if(typeof this.what === 'function')
+					{
+						objs.push(this.what.apply(context));
+					}
+					else objs.push(this.what);
 				}
-				else if(typeof this.what === 'function')
-				{
-					objs.push(this.what.apply(controller));
-				}
+					
 				
 				if(typeof this.how === "string")
 				{
-					this.how = deep.interpret(this.how, context);
-					objs.push(deep.request.retrieve(this.how, { callFunctions:false, root:context._deep_entry || context, acceptQueryThis:true }));
+					var how = deep.interpret(this.how, context);
+					objs.push(deep.request.retrieve(how, { callFunctions:false, root:context._deep_entry || context, acceptQueryThis:true }));
 				}	
 				if(typeof this.where === "string")
 				{
-					this.where = deep.interpret(this.where, context);
-					objs.push(deep.request.retrieve(this.where, { callFunctions:false, root:context._deep_entry || context, acceptQueryThis:true }));
+					var where = deep.interpret(this.where, context);
+					objs.push(deep.request.retrieve(where, { callFunctions:false, root:context._deep_entry || context, acceptQueryThis:true }));
 				}	
 				objs.unshift(renderable);
 				return deep.all(objs)
