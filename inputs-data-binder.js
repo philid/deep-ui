@@ -335,8 +335,8 @@ define( function(require){
 		}
 		//console.log("inputs-data-binder", "toDatas() give (before copy old datas): " , JSON.stringify(this.output), " - datas ? ",  JSON.stringify(this.datas))
 		//if(this.editMode)
-		if(this.datas)
-			deep.utils.bottom(this.datas, this.output);
+		//if(this.datas)
+			//deep.utils.bottom(this.datas, this.output);
 		//if(console.flags["inputs-data-binder"]) 
 			//console.log("inputs-data-binder", "toDatas() give : " + JSON.stringify(this.output))
 		return this.output;

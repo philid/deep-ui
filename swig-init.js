@@ -96,13 +96,18 @@ define(function(require){
 		json:function(input){
 			return JSON.stringify(input, null, ' ')
 		},
-		floorDivision:function(input, by){
-			//console.log("floor division : ", input, " - ", by, " res : ", Math.floor(input/by))
-			return Math.floor(input/by);
+		floor:function(input){
+			return Math.floor(input);
 		},
-		ceilDivision:function(input, by){
-			//console.log("ceil division : ", input, " - ", by, " res : ", Math.ceil(input/by))
-			return Math.ceil(input/by);
+		ceil:function(input){
+			return Math.ceil(input);
+		},
+		division:function(input, by){
+			//console.log("floor division : ", input, " - ", by, " res : ", Math.floor(input/by))
+			return input/by;
+		},
+		minus:function(input, minus){
+			return input-minus;
 		},
 		gridCollumnIndex:function(input, numCols){
 			//console.log("gridCollumnIndex : ", input, " - ", numCols, " res : ", input%numCols)
