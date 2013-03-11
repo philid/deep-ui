@@ -18,9 +18,12 @@ define(["require", "./view-controller","./plugin"], function AppControllerDefine
 
 	var AppController =  {
 
+
+
 		init:function () {
 			console.log(" APP-CTRL INIT ");
 			othis=this;
+
 			$.address.externalChange(function(event) {
 				othis.urlChanged(event);
 			});
@@ -35,6 +38,7 @@ define(["require", "./view-controller","./plugin"], function AppControllerDefine
 			.query("./externals")
 			.deepLoad();
 		},
+	
 		currentView:null,
 		updateDeepLink:function  (path) {
 			if(path == $.address.path())
