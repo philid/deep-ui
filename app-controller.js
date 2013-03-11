@@ -11,10 +11,10 @@ TO DO :
 if(typeof define !== 'function')
 	var define = require('amdefine')(module);
 
-define(["require", "deep-ui/view-controller"], function AppControllerDefine(require){
+define(["require", "./view-controller","./plugin"], function AppControllerDefine(require){
 
 	var deep = require("deep/deep");	
-	var ViewController = require("deep-ui/view-controller");
+	var ViewController = require("./view-controller");
 
 	var AppController =  {
 
@@ -77,7 +77,7 @@ define(["require", "deep-ui/view-controller"], function AppControllerDefine(requ
 			this.urlChanged(info);
 		},
 		urlChanged:function (urlParams) {
-			//console.log("URL CHANGED params = ", urlParams);
+			console.log("URL CHANGED params = ", urlParams);
 			var currentMapEntry = this.deeplinkingMap;
 			var ok = true;
 
@@ -85,6 +85,21 @@ define(["require", "deep-ui/view-controller"], function AppControllerDefine(requ
 				ok = false;
 				var current = urlParams.pathNames.shift();
 				//search in the map if we have a entry
+				if(currentMapEntry._roles && currentMapEntry._roles.length > 0)
+				{
+					var roles =  null;
+					if(! _APP.user)
+						roles = ["public"];
+					else
+						roles = _APP.user.roles || ["user"];
+					var roleOk = false;
+					roles.forEach(function (role) {
+						roleOk = roleOk || deep.utils.inArray(role, currentMapEntry._roles);
+					});
+					if(!roleOk)
+						break;
+				}
+
 				if(currentMapEntry[current])
 				{
 					currentMapEntry = currentMapEntry[current]
@@ -96,7 +111,7 @@ define(["require", "deep-ui/view-controller"], function AppControllerDefine(requ
 					var parsed = parseInt(current);
 					if(!isNaN(parsed))
 					{
-						currentMapEntry = currentMapEntry._int_
+						currentMapEntry = currentMapEntry._int_;
 						ok = true;
 						//console.log("Got an integer", current);
 					}
@@ -106,6 +121,11 @@ define(["require", "deep-ui/view-controller"], function AppControllerDefine(requ
 					currentMapEntry = currentMapEntry._id_
 					ok = true;
 				}
+				/*else if(currentMapEntry._language_ && _APP.allowedLanguages)
+				{
+					currentMapEntry = currentMapEntry._id_
+					ok = true;
+				*/
 				else
 				{
 					//other possible cases
@@ -123,8 +143,9 @@ define(["require", "deep-ui/view-controller"], function AppControllerDefine(requ
 			else
 			{
 				//console.log(" will open the default page");
-				if(currentMapEntry.defaultHandler)
-					currentMapEntry.defaultHandler.apply(this);
+				var defHandler = currentMapEntry.defaultHandler || this.deeplinkingMap.defaultHandler;
+				if(defHandler)
+					defHandler.apply(this);
 				else
 					console.log("deep-link failed : nothing to do with : ", urlParams);
 			}

@@ -10,7 +10,7 @@ console.flog = function(flag, message)
 
 require.config({
 	 baseUrl: "/common/js-lib"
-    ,paths:[{"deep":"deep"}]
+    ,paths:[{"deep/deep":"deep/deep"}]
    
 });
 require([ "app.js", "/common/js-lib/swig/swig.pack.min.js", "deep-ui/view-controller"], function( app ) {

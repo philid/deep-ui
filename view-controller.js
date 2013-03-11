@@ -82,6 +82,7 @@ define(function (require)
 			var args = Array.prototype.slice.call(arguments).join(",");
 			return deep(this)
 			.position("controller")
+			.run("willRefresh")
 			.run("beforeRefresh")
 			.query("./renderables/["+args+"]")
 			.run(function() // load renderables
@@ -106,10 +107,10 @@ define(function (require)
 					{
 						objs.push(this.what.apply(context));
 					}
-					else objs.push(this.what);
+					else 
+						objs.push(this.what);
 				}
 					
-				
 				if(typeof this.how === "string")
 				{
 					var how = deep.interpret(this.how, context);
@@ -169,7 +170,13 @@ define(function (require)
 					_APP.updateDeepLink(this.deepLinkPath);
 			})
 			//.log("____________________________________________________________________ refreshed")
-			.run("setBehaviour");
+			.run(function () {
+				var values  = deep(this.renderables).query("./*/nodes").values();
+				if(this.setBehaviour)
+					this.setBehaviour(values);
+				if(this.hasRefresh)
+					this.hasRefresh(values);
+			});
 		})
 	}
 	return ViewController;

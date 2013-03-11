@@ -3,7 +3,7 @@ if(typeof define !== 'function'){
 	var swig = require("swig");
 }
 
-define(["require", "deep/deep", "deep-ui/view-controller", "deep-ui/app-controller", "deep-ui/inputs-data-binder"],
+define(["require", "deep/deep", "./view-controller", "./app-controller", "./inputs-data-binder"],
 	function (require, deep, VC, AC, Binder){
 	//console.log("PLUGIN LOADED")
 	//var deep = require("deep/deep");
