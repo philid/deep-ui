@@ -292,21 +292,24 @@ define( function(require){
 				if(this.pathMap[f].schema)
 				{
 					//console.log("DATA BINDER : to datas : ", f, " - ", this.pathMap[f].schema )
-					switch(this.pathMap[f].schema.type)
-					{
-						case "array" : 
-							if(field.lastNodeRef[field.lastPathPart] == null)
-								field.lastNodeRef[field.lastPathPart] = new Array();
-							break;
-						case "number" : val = parseFloat(val); break;	
-						case "float" : val = parseFloat(val); break;	
-						case "integer" : val = parseInt(val); break;
-						case "boolean" :
-							//console.log("VERIFY A BOOLEAN VALUE - value = ", val )
-							val = (val == 'true' || val == "1")?true:false;
-							break;	
-						default : ;
-					}
+					 if(val == null && this.pathMap[f].schema.type && deep.utils.inArray("null", this.pathMap[f].schema.type))
+					 	;
+					 else
+						switch(this.pathMap[f].schema.type)
+						{
+							case "array" : 
+								if(field.lastNodeRef[field.lastPathPart] == null)
+									field.lastNodeRef[field.lastPathPart] = new Array();
+								break;
+							case "number" : val = parseFloat(val); break;	
+							case "float" : val = parseFloat(val); break;	
+							case "integer" : val = parseInt(val); break;
+							case "boolean" :
+								//console.log("VERIFY A BOOLEAN VALUE - value = ", val )
+								val = (val == 'true' || val == "1")?true:false;
+								break;	
+							default : ;
+						}
 	
 				}
 
