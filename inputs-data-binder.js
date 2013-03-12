@@ -236,9 +236,10 @@ define( function(require){
 		return this;
 	} 
 
+
 	InputsDataBinder.prototype.toDatas = function toDatas()
 	{
-		//console.log("InputsDataBinder.toDatas : contaxt.datas ? "+this.context.datas)	
+		console.log("InputsDataBinder.toDatas ")	
 		this.output = {};
 		this.createPathMap();
 
@@ -286,13 +287,13 @@ define( function(require){
 				if(val == "null" || val == "undefined" || val == undefined)
 					val = null;
 
-				//console.log("INputsDataBinder.toDatas() : analyse field : ", field )
+				console.log("INputsDataBinder.toDatas() : analyse field : ", field )
 				//console.log("INputsDataBinder.toDatas() : field has schema: ", this.pathMap[f].schema )
 
 				if(this.pathMap[f].schema)
 				{
 					//console.log("DATA BINDER : to datas : ", f, " - ", this.pathMap[f].schema )
-					 if(val == null && this.pathMap[f].schema.type && deep.utils.inArray("null", this.pathMap[f].schema.type))
+					 if(val == null && this.pathMap[f].schema.type && this.pathMap[f].schema.type instanceof  Array && deep.utils.inArray("null", this.pathMap[f].schema.type || []))
 					 	;
 					 else
 						switch(this.pathMap[f].schema.type)
@@ -520,6 +521,8 @@ define( function(require){
 
 	InputsDataBinder.prototype.partialValidation = function(fields)
 	{
+		console.log("partial validation");
+
 		this.toDatas();
 		var othis = this;
 		var report = deep.partialValidation(this.output, this.schema, {fieldsToCheck:fields});
