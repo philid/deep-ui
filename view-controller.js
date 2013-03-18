@@ -161,8 +161,8 @@ define(function (require)
 					renderable.nodes = nodes;
 					if(typeof renderable.done === "function")
 						return renderable.done.apply(context, [nodes, r, what]) || [nodes, r, what];
-					return nodes || r; 
-				})
+					return nodes || r;
+				});
 			})
 			.back("controller")
 			.run(function () {
@@ -177,7 +177,29 @@ define(function (require)
 				if(this.hasRefresh)
 					this.hasRefresh(values);
 			});
-		})
-	}
+		}),
+		show:function () {
+			var controller = this;
+			var args = Array.prototype.slice.call(arguments).join(",");
+			return deep(this)
+			.position("controller")
+			.query("./renderables/["+ args +"]")
+			.run(function () {
+				if(this.nodes)
+					this.nodes.show();
+			});
+		},
+		hide:function () {
+			var controller = this;
+			var args = Array.prototype.slice.call(arguments).join(",");
+			return deep(this)
+			.position("controller")
+			.query("./renderables/["+ args +"]")
+			.run(function () {
+				if(this.nodes)
+					this.nodes.hide();
+			});
+		}
+	};
 	return ViewController;
-})
+});
