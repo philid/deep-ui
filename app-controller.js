@@ -13,13 +13,10 @@ if(typeof define !== 'function')
 
 define(["require", "./view-controller","./plugin"], function AppControllerDefine(require){
 
-	var deep = require("deep/deep");	
+	var deep = require("deep/deep");
 	var ViewController = require("./view-controller");
 
 	var AppController =  {
-
-
-
 		init:function () {
 			console.log(" APP-CTRL INIT ");
 			othis=this;
@@ -29,11 +26,11 @@ define(["require", "./view-controller","./plugin"], function AppControllerDefine
 			});
 			$.address.internalChange(function (argument) {
 				// body...
-			})
+			});
 			//return deep(this).query("./views/*").bottom(ViewController);
 		},
 		load:function () {
-			console.log("APP-CTRL load")
+			console.log("APP-CTRL load");
 			return deep(this)
 			.query("./externals")
 			.deepLoad();
