@@ -238,37 +238,99 @@ function(require, deep, VC, AC, Binder) {
 		}
 	};
 
-	deep(deep.request).up({
-		/*post:function  (uri, object, options) 
+	deep.mediaCache = {
+		cache:{},
+		reloadablesUriDico : {},
+		reloadablesRegExpDico : [ /^(json::)/gi /* ,/(\.json)$/gi */ ],
+		clearCache:function ()
 		{
-			console.log("POST from deep-ui-plugin")
-			
-			var headers = {};
-			//this.setRequestHeaders(options, headers);
-			//console.log("HEADER  : ", headers )
-			var postRequest= HTTPrequest({
-					method: "POST",
-					url:uri,
-					body: JSON.stringify(object),
-					headers: headers
-				});
-			
-			return deep.when( postRequest )
-				.done( function (results) {
-					return results
-				})
-				.fail( function  (error) {
-					console.log("error (remote HTTP call failed) while calling remote-services on autobhan post plugin : ", error);
-					return error;
-				});
-		},
-		put:function ( uri, object, options) 
-		{
-			console.log("put from autobahn-plugin")
-		}*/
-	});
-	//console.log("deep after lugin : ", layer)
+			this.cache = {};
+		}
+	};
 
+	var manageCache = function (response, uri) {
+		if(deep.mediaCache.reloadablesUriDico[uri])
+			return;
+		var count = 0;
+		reg = deep.mediaCache.reloadablesRegExpDico[count];
+		while(reg && !uri.match(reg))
+			reg = deep.mediaCache.reloadablesRegExpDico[++count];
+		if(count == deep.mediaCache.reloadablesRegExpDico.length)
+			deep.mediaCache.cache[uri] = response;
+	}
+
+	deep.stores.json = new deep.store.DeepStore();
+	deep.utils.up({
+			manageCache:manageCache,
+			writeJQueryDefaultHeaders : function (req) {
+				
+			},
+			get:function (id) {
+				if(deep.mediaCache.cache[id])
+					return deep(deep.mediaCache.cache[id]).store(this);
+				var self = this;
+				var d = deep($.ajax({
+					beforeSend :function(req) {
+						self.writeJQueryDefaultHeaders(req);
+						req.setRequestHeader("Accept", "application/json; charset=utf-8");
+					},
+					contentType: "application/json; charset=utf-8",
+					url:id,
+					method:"GET",
+					datatype:"json"
+				})
+				.done(function(data, msg, jqXHR){
+					if(typeof data === 'string')
+						data = JSON.parse(data);
+					self.manageCache(data, id);
+					return data;
+				})
+				.fail(function(){
+					console.log("deep.store.json error : ", arguments);
+					return new Error("deep.store.json failed : "+id+" - \n\n"+JSON.stringify(arguments));
+				})).store(this);
+				self.manageCache(d, id);
+				return d;
+			},
+			put:function (object, id) {
+				id = id || object.id;
+				if(options.schema)
+					deep(object)
+					.validate(options.schema)
+					.fail(function (error) {
+						object = error;
+					})
+					.root(arr)
+					.replace("./*?id="+id, object);
+				else
+					deep(arr)
+					.replace("./*?id="+id, object);
+				return deep(object).store(this);
+			},
+			post:function (object, id) {
+				id = id || object.id;
+				if(!id)
+					object.id = id = new Date().valueOf(); // mongo styled id
+				if(options.schema)
+					deep(object)
+					.validate(options.schema)
+					.done(function (report) {
+						arr.push(object);
+					})
+					.fail(function (error) {
+						object = error;
+					});
+				else
+					arr.push(object);
+				return deep(object).store(this);
+			},
+			del:function (id) {
+				return deep(arr).remove("./*?id="+id).store(this);
+			},
+			patch:function (object, id) {
+				return deep(arr).query("./*?id="+id).up(object).store(this);
+			}
+	}, deep.stores.json);
 	return deep;
 
 });
