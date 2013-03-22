@@ -279,7 +279,12 @@ define( function(require){
 					case "hidden":
 					case "password":
 					case "textarea":
-						val = $(field.input).val();
+						if(  $(field.input).hasClass("html-text") )
+						{
+							val = $(field.input).data('liveEdit').getXHTMLBody();
+							console.log("HTML-TEXT databinded : ", val);
+						} else
+							val = $(field.input).val();
 						break;
 					default : // text, hidden, textarea
 						null;
