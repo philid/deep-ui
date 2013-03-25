@@ -123,12 +123,15 @@ function(require, deep, VC, AC, Binder)
 		},
 		appendTo: function(selector, force) {
 			return function(rendered, nodes) {
+				//console.log("deep.ui.appendTo : ", rendered, nodes, selector)
 				if (!force && nodes && nodes.parents('html').length > 0) {
 					var newNodes = $(rendered);
 					$(nodes).replaceWith(newNodes);
 					return newNodes;
 				}
-				return $(rendered).appendTo(selector);
+				nodes = $(rendered).appendTo(selector);
+				//console.log("appendto : appended : ", $(selector));
+				return nodes;
 			};
 		},
 		prependTo: function(selector, force) {
@@ -191,7 +194,7 @@ function(require, deep, VC, AC, Binder)
 	};
 
 	var manageCache = function (response, uri) {
-		//console.log("manage cache : ", response, uri);
+		console.log("manage cache : ", response, uri);
 		if(deep.mediaCache.reloadablesUriDico[uri])
 			return;
 		var count = 0;
@@ -199,7 +202,10 @@ function(require, deep, VC, AC, Binder)
 		while(reg && !(reg.test(uri)))
 			reg = deep.mediaCache.reloadablesRegExpDico[++count];
 		if(count == deep.mediaCache.reloadablesRegExpDico.length)
+		{
 			deep.mediaCache.cache[uri] = response;
+			console.log("deep-ui : manageCache : retain !!!")
+		}
 	};
 
 	var writeJQueryDefaultHeaders = function (req) {};
@@ -213,8 +219,17 @@ function(require, deep, VC, AC, Binder)
 	];
 	deep.stores.json.get = function (id, options) {
 		//console.log("json.get : ", id);
+		var noCache = true;
+		for (var i = 0; i < this.extensions.length; ++i) {
+			if(this.extensions[i].test(id))
+			{
+				noCache = false;
+				break;
+			}
+		};
+
 		var d = null;
-		if(id !== "" && deep.mediaCache.cache[id])
+		if(!noCache && id !== "" && deep.mediaCache.cache[id])
 		{
 			d = deep(deep.mediaCache.cache[id]).store(this);
 			if(deep.mediaCache.cache[id] instanceof Array)
@@ -235,7 +250,7 @@ function(require, deep, VC, AC, Binder)
 		.done(function(data, msg, jqXHR){
 			if(typeof data === 'string')
 				data = JSON.parse(data);
-			if((options && options.cache !== false)  || (self.options && self.options.cache !== false))
+			if(!noCache && (options && options.cache !== false)  || (self.options && self.options.cache !== false))
 				manageCache(data, id);
 
 			return data;
@@ -245,7 +260,7 @@ function(require, deep, VC, AC, Binder)
 			return new Error("deep.store.json failed : "+id+" - \n\n"+JSON.stringify(arguments));
 		}))
 		.done(function (datas) {
-			console.log("json.get : result : ", datas);
+			//console.log("json.get : result : ", datas);
 			if(datas instanceof Array)
 				d._entries = deep(datas).query("./*").nodes();
 			else
@@ -257,7 +272,7 @@ function(require, deep, VC, AC, Binder)
 			//console.log("json.get : result 2 : ", success);
 			d.range = deep.Handler.range;
 		});
-		if((options && options.cache !== false)  || (self.options && self.options.cache !== false))
+		if(!noCache && (options && options.cache !== false)  || (self.options && self.options.cache !== false))
 			manageCache(d, id);
 
 		//console.log("json.get : handler ? ", d instanceof deep.Handler);
@@ -491,10 +506,10 @@ function(require, deep, VC, AC, Binder)
 				}
 				else
 				{
-					rangeResult.totalCount = parseInt(rangePart[1]);
+					rangeResult.totalCount = parseInt(rangePart[1], 10);
 					var spl = rangePart[0].split("-");
-					rangeResult.start = parseInt(spl[0]);
-					rangeResult.end = parseInt(spl[1]);
+					rangeResult.start = parseInt(spl[0], 10);
+					rangeResult.end = parseInt(spl[1], 10);
 				}
 			}
 			else
@@ -628,9 +643,9 @@ function(require, deep, VC, AC, Binder)
 		var d = deep.stores.html.get(id, {cache:false})
 		.done(function (data) {
 			var resi = swig.compile(data, { filename:deep.utils.stripFirstSlash(id) });
-			delete deep.mediaCache.cache[id];
+			delete deep.mediaCache.cache["swig::"+id];
 			if((options && options.cache !== false)  || (self.options && self.options.cache !== false))
-				manageCache(resi, id);
+				manageCache(resi, "swig::"+id);
 			return resi;
 		})
 		.store(this);
@@ -640,5 +655,25 @@ function(require, deep, VC, AC, Binder)
 	};
 	//__________________________________________________
 
+	deep.stores["dom.appendTo"] = {
+		get:function (selector, options) {
+			return deep.ui.appendTo(selector);
+		}
+	};
+	deep.stores["dom.prependTo"] = {
+		get:function (selector, options) {
+			return deep.ui.prependTo(selector);
+		}
+	};
+	deep.stores["dom.htmlOf"] = {
+		get:function (selector, options) {
+			return deep.ui.htmlOf(selector);
+		}
+	};
+	deep.stores["dom.replace"] = {
+		get:function (selector, options) {
+			return deep.ui.replace(selector);
+		}
+	};
 	return deep;
 });
