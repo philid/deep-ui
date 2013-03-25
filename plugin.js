@@ -625,9 +625,9 @@ function(require, deep, VC, AC, Binder)
 		if(options.cache !== false && deep.mediaCache.cache["swig::"+id])
 			return deep(deep.mediaCache.cache["swig::"+id]).store(this);
 		var self = this;
-		var d = deep.store.html.get(id, {cache:false})
+		var d = deep.stores.html.get(id, {cache:false})
 		.done(function (data) {
-			var resi = swig.compile(data, { filename:utils.stripFirstSlash(id) });
+			var resi = swig.compile(data, { filename:deep.utils.stripFirstSlash(id) });
 			delete deep.mediaCache.cache[id];
 			if((options && options.cache !== false)  || (self.options && self.options.cache !== false))
 				manageCache(resi, id);
