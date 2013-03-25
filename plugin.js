@@ -4,10 +4,9 @@ if (typeof define !== 'function') {
 }
 
 define(["require", "deep/deep", "./view-controller", "./app-controller", "./inputs-data-binder"],
-
-function(require, deep, VC, AC, Binder) {
-	//console.log("PLUGIN LOADED")
-	//var deep = require("deep/deep");
+function(require, deep, VC, AC, Binder)
+{
+	//_____________________________________________________________ Custom Chain Handler
 
 	var layer = {
 		prototype: {
@@ -89,16 +88,17 @@ function(require, deep, VC, AC, Binder) {
 			render: function(renderable) {
 				var self = this;
 				var func = function(s, e) {
-
 					var alls = [];
 					if (renderable) {
 						self._entries.forEach(function(entry) {
-							alls.push(deep.ui.applyRenderable.apply(renderable, [entry]));
+							alls.push(deep.applyTreatment.apply(renderable, [entry.value]));
 						});
 					} else {
 						self._entries.forEach(function(entry) {
-							if (typeof entry.refresh === 'function') alls.push(entry.refresh());
-							else alls.push(JSON.stringify(entry.value));
+							if (typeof entry.value.refresh === 'function')
+								alls.push(entry.value.refresh());
+							else
+								alls.push(JSON.stringify(entry.value));
 						});
 					}
 					deep.all(alls)
@@ -112,6 +112,10 @@ function(require, deep, VC, AC, Binder) {
 			}
 		}
 	};
+	deep.utils.up(layer.prototype, deep.Handler.prototype);
+
+	//__________________________________________________________________________ Additional API
+
 	deep.ui = {
 		swig: function(string, options) {
 			options = options || {};
@@ -155,73 +159,9 @@ function(require, deep, VC, AC, Binder) {
 		AppController: AC,
 		Binder: Binder,
 		render: function(renderable, context) {
-			return deep.ui.applyRenderable.apply(renderable, [context || {}]);
-		},
-		applyRenderable: function(context) {
-			if (!this.how || this.condition === false) return false;
-			if (this.condition) if (typeof this.condition === "function" && !this.condition.apply(this)) return false;
-			context = context || this;
-			var self = this;
-			var objs = [];
-			//console.log("view-controller will retrieve : from : ",this._deep_entry)
-
-			if (typeof this.what === 'string') {
-				var what = deep.interpret(this.what, context);
-				objs.push(deep.request.retrieve(what, {
-					root: context._deep_entry || context,
-					acceptQueryThis: true
-				}));
-			} else if (typeof this.what === 'function') {
-				objs.push(this.what.apply(controller));
-			} else if (this.what) objs.push(this.what);
-
-			if (typeof this.how === "string") {
-				var how = deep.interpret(this.how, context);
-				objs.push(deep.request.retrieve(how, {
-					root: context._deep_entry || context,
-					acceptQueryThis: true
-				}));
-			}
-			if (typeof this.where === "string") {
-				var where = deep.interpret(this.where, context);
-				objs.push(deep.request.retrieve(where, {
-					root: context._deep_entry || context,
-					acceptQueryThis: true
-				}));
-			}
-			return deep.all(objs)
-				.done(function(results) {
-				var what = (self.what) ? results.shift() : context;
-				if (what._isDQ_NODE_) what = what.value;
-				var how = (typeof self.how === "string") ? results.shift() : self.how;
-				var where = (typeof self.where === "string") ? results.shift() : self.where;
-				var r = "";
-				var nodes = self.nodes || null;
-				try {
-					r = how(what);
-					if (where) nodes = where(r, nodes);
-				} catch (e) {
-					console.log("Error while rendering : ", e);
-					if (typeof self.fail === 'function')
-						return self.fail.apply(context, [e]) || e;
-					return e;
-				}
-				//if(!dontKeepNodes)
-				//	self.nodes = nodes;
-				if (typeof self.done === "function")
-					return self.done.apply(context, [nodes, r, what]) || [nodes, r, what];
-
-				return nodes || r;
-			})
-			.fail(function(error) {
-				console.log("Error while rendering : ", error);
-				if (typeof self.fail === 'function')
-					return self.fail.apply(context, [error]) || error;
-				return error;
-			});
+			return deep.applyTreatment.apply(renderable, [context || {}]);
 		}
 	};
-	deep.utils.up(layer.prototype, deep.Handler.prototype);
 
 	deep.linker = {
 		addToPath: function(section) {
@@ -238,6 +178,8 @@ function(require, deep, VC, AC, Binder) {
 		}
 	};
 
+	//___________________________________ STORES
+
 	deep.mediaCache = {
 		cache:{},
 		reloadablesUriDico : {},
@@ -249,88 +191,454 @@ function(require, deep, VC, AC, Binder) {
 	};
 
 	var manageCache = function (response, uri) {
+		//console.log("manage cache : ", response, uri);
 		if(deep.mediaCache.reloadablesUriDico[uri])
 			return;
 		var count = 0;
 		reg = deep.mediaCache.reloadablesRegExpDico[count];
-		while(reg && !uri.match(reg))
+		while(reg && !(reg.test(uri)))
 			reg = deep.mediaCache.reloadablesRegExpDico[++count];
 		if(count == deep.mediaCache.reloadablesRegExpDico.length)
 			deep.mediaCache.cache[uri] = response;
-	}
+	};
+
+	var writeJQueryDefaultHeaders = function (req) {};
+
+	//___________________________ JSON
 
 	deep.stores.json = new deep.store.DeepStore();
-	deep.utils.up({
-			manageCache:manageCache,
-			writeJQueryDefaultHeaders : function (req) {
-				
-			},
-			get:function (id) {
-				if(deep.mediaCache.cache[id])
-					return deep(deep.mediaCache.cache[id]).store(this);
-				var self = this;
-				var d = deep($.ajax({
-					beforeSend :function(req) {
-						self.writeJQueryDefaultHeaders(req);
-						req.setRequestHeader("Accept", "application/json; charset=utf-8");
-					},
-					contentType: "application/json; charset=utf-8",
-					url:id,
-					method:"GET",
-					datatype:"json"
-				})
-				.done(function(data, msg, jqXHR){
-					if(typeof data === 'string')
-						data = JSON.parse(data);
-					self.manageCache(data, id);
-					return data;
-				})
-				.fail(function(){
-					console.log("deep.store.json error : ", arguments);
-					return new Error("deep.store.json failed : "+id+" - \n\n"+JSON.stringify(arguments));
-				})).store(this);
-				self.manageCache(d, id);
-				return d;
-			},
-			put:function (object, id) {
-				id = id || object.id;
-				if(options.schema)
-					deep(object)
-					.validate(options.schema)
-					.fail(function (error) {
-						object = error;
-					})
-					.root(arr)
-					.replace("./*?id="+id, object);
-				else
-					deep(arr)
-					.replace("./*?id="+id, object);
-				return deep(object).store(this);
-			},
-			post:function (object, id) {
-				id = id || object.id;
-				if(!id)
-					object.id = id = new Date().valueOf(); // mongo styled id
-				if(options.schema)
-					deep(object)
-					.validate(options.schema)
-					.done(function (report) {
-						arr.push(object);
-					})
-					.fail(function (error) {
-						object = error;
-					});
-				else
-					arr.push(object);
-				return deep(object).store(this);
-			},
-			del:function (id) {
-				return deep(arr).remove("./*?id="+id).store(this);
-			},
-			patch:function (object, id) {
-				return deep(arr).query("./*?id="+id).up(object).store(this);
-			}
-	}, deep.stores.json);
-	return deep;
 
+	deep.stores.json.extensions = [
+		/(\.json(\?.*)?)$/gi
+	];
+	deep.stores.json.get = function (id, options) {
+		//console.log("json.get : ", id);
+		var d = null;
+		if(id !== "" && deep.mediaCache.cache[id])
+		{
+			d = deep(deep.mediaCache.cache[id]).store(this);
+			if(deep.mediaCache.cache[id] instanceof Array)
+				d.query("./*");
+			return d;
+		}
+		var self = this;
+		d = deep($.ajax({
+			beforeSend :function(req) {
+				writeJQueryDefaultHeaders(req);
+				req.setRequestHeader("Accept", "application/json; charset=utf-8");
+			},
+			contentType: "application/json; charset=utf-8",
+			url:id,
+			method:"GET",
+			datatype:"json"
+		})
+		.done(function(data, msg, jqXHR){
+			if(typeof data === 'string')
+				data = JSON.parse(data);
+			if((options && options.cache !== false)  || (self.options && self.options.cache !== false))
+				manageCache(data, id);
+
+			return data;
+		})
+		.fail(function(){
+			console.log("deep.store.json error : ", arguments);
+			return new Error("deep.store.json failed : "+id+" - \n\n"+JSON.stringify(arguments));
+		}))
+		.done(function (datas) {
+			console.log("json.get : result : ", datas);
+			if(datas instanceof Array)
+				d._entries = deep(datas).query("./*").nodes();
+			else
+				d._entries = [deep.Querier.createRootNode(datas)];
+			return datas;
+		})
+		.store(this)
+		.done(function (success) {
+			//console.log("json.get : result 2 : ", success);
+			d.range = deep.Handler.range;
+		});
+		if((options && options.cache !== false)  || (self.options && self.options.cache !== false))
+			manageCache(d, id);
+
+		//console.log("json.get : handler ? ", d instanceof deep.Handler);
+		return d;
+	};
+	deep.stores.json.put = function (object, id) {
+		var self = this;
+		var d = null;
+		return d = deep($.ajax({
+			beforeSend :function(req) {
+				writeJQueryDefaultHeaders(req);
+				req.setRequestHeader("Accept", "application/json; charset=utf-8;");
+			},
+			type:"PUT",
+			url:id,
+			dataType:"application/json; charset=utf-8;",
+			contentType:"application/json; charset=utf-8;",
+			data:JSON.stringify(object)
+		})
+		.fail(function  (jqXHR, textStatus, errorThrown) {
+			var test = $.parseJSON(jqXHR.responseText);
+			if(jqXHR.status < 300)
+			{
+				//console.log("DeepRequest.post : error but status 2xx : ", test, " - status provided : "+jqXHR.status);
+				if(typeof test === 'string')
+					test = $.parseJSON(test);
+				return test;
+			}
+			else
+			{
+				return new Error("deep.store.json.put failed : "+id+" - details : "+JSON.stringify(arguments));
+			}
+		}))
+		.store(this)
+		.done(function (argument) {
+			d.range = deep.Handler.range;
+		});
+	};
+	deep.stores.json.post = function (object, id) {
+		var self = this;
+		var d = null;
+		return d = deep($.ajax({
+			beforeSend :function(req) {
+				writeJQueryDefaultHeaders(req);
+				req.setRequestHeader("Accept", "application/json; charset=utf-8;");
+			},
+			type:"POST",
+			url:id,
+			dataType:"application/json; charset=utf-8;",
+			contentType:"application/json; charset=utf-8;",
+			data:JSON.stringify(object)
+		})
+		.fail(function  (jqXHR, textStatus, errorThrown) {
+			var test = $.parseJSON(jqXHR.responseText);
+			if(jqXHR.status < 300)
+			{
+				//console.log("DeepRequest.post : error but status 2xx : ", test, " - status provided : "+jqXHR.status);
+				if(typeof test === 'string')
+					test = $.parseJSON(test);
+				return test;
+			}
+			else
+			{
+				return new Error("deep.store.json.post failed : "+id+" - details : "+JSON.stringify(arguments));
+			}
+		}))
+		.store(this)
+		.done(function (argument) {
+			d.range = deep.Handler.range;
+		});
+	};
+	deep.stores.json.del = function (id) {
+		var self = this;
+		var d = null;
+		return d = deep($.ajax({
+			beforeSend :function(req) {
+				writeJQueryDefaultHeaders(req);
+				req.setRequestHeader("Accept", "application/json; charset=utf-8;");
+			},
+			type:"DELETE",
+			url:id
+		})
+		.fail(function  (jqXHR, textStatus, errorThrown) {
+			var test = $.parseJSON(jqXHR.responseText);
+			if(jqXHR.status < 300)
+			{
+				//console.log("DeepRequest.post : error but status 2xx : ", test, " - status provided : "+jqXHR.status);
+				if(typeof test === 'string')
+					test = $.parseJSON(test);
+				return test;
+			}
+			else
+			{
+				return new Error("deep.store.json.del failed : "+id+" - details : "+JSON.stringify(arguments));
+			}
+		}))
+		.store(this)
+		.done(function (argument) {
+			d.range = deep.Handler.range;
+		});
+	};
+	deep.stores.json.patch = function (object, id) {
+		var self = this;
+		var d = null;
+		return d = deep($.ajax({
+			beforeSend :function(req) {
+				writeJQueryDefaultHeaders(req);
+				req.setRequestHeader("Accept", "application/json; charset=utf-8;");
+			},
+			type:"PATCH",
+			url:id,
+			dataType:"application/json; charset=utf-8;",
+			contentType:"application/json; charset=utf-8;",
+			data:JSON.stringify(object)
+		})
+		.fail(function  (jqXHR, textStatus, errorThrown)
+		{
+			var test = $.parseJSON(jqXHR.responseText);
+			if(jqXHR.status < 300)
+			{
+				//console.log("DeepRequest.post : error but status 2xx : ", test, " - status provided : "+jqXHR.status);
+				if(typeof test === 'string')
+					test = $.parseJSON(test);
+				return test;
+			}
+			else
+				return new Error("deep.store.json.patch failed : "+id+" - details : "+JSON.stringify(arguments));
+				//deferred.reject({msg:"DeepRequest.patch failed : "+info.request, status:jqXHR.status, details:arguments, uri:id});
+		}))
+		.store(this)
+		.done(function (argument) {
+			d.range = deep.Handler.range;
+		});
+	};
+	deep.stores.json.bulk = function (arr, uri, options) {
+		var self = this;
+		var d = null;
+		return d = deep($.ajax({
+			beforeSend :function(req) {
+				writeJQueryDefaultHeaders(req);
+				req.setRequestHeader("Accept", "application/json; charset=utf-8;");
+			},
+			type:"POST",
+			url:uri,
+			dataType:"message/json; charset=utf-8;",
+			contentType:"message/json; charset=utf-8;",
+			data:JSON.stringify(arr)
+		})
+		.fail(function  (jqXHR, textStatus, errorThrown)
+		{
+			var test = $.parseJSON(jqXHR.responseText);
+			if(jqXHR.status < 300)
+			{
+				if(typeof test === 'string')
+					test = $.parseJSON(test);
+				return test;
+			}
+			else
+				return new Error("deep.store.json.bulk failed : "+uri+" - details : "+JSON.stringify(arguments));
+		}))
+		.store(this)
+		.done(function () {
+			d.range = deep.Handler.range;
+		});
+	};
+	deep.stores.json.rpc = function (method, params, id) {
+		var self = this;
+		var callId = "call"+new Date().valueOf();
+		var d = null;
+		return d = deep($.ajax({
+			beforeSend :function(req) {
+				writeJQueryDefaultHeaders(req);
+				req.setRequestHeader("Accept", "application/json; charset=utf-8;");
+			},
+			type:"PATCH",
+			url:id,
+			dataType:"application/json; charset=utf-8;",
+			contentType:"application/json; charset=utf-8;",
+			data:JSON.stringify({
+				id:callId,
+				method:method,
+				params:params||[]
+			})
+		})
+		.fail(function  (jqXHR, textStatus, errorThrown)
+		{
+			var test = $.parseJSON(jqXHR.responseText);
+			if(jqXHR.status < 300)
+			{
+				//console.log("DeepRequest.post : error but status 2xx : ", test, " - status provided : "+jqXHR.status);
+				if(typeof test === 'string')
+					test = $.parseJSON(test);
+				return test;
+			}
+			else
+				return new Error("deep.store.json.patch failed : "+id+" - details : "+JSON.stringify(arguments));
+				//deferred.reject({msg:"DeepRequest.patch failed : "+info.request, status:jqXHR.status, details:arguments, uri:id});
+		}))
+		.store(this)
+		.done(function (argument) {
+			d.range = deep.Handler.range;
+		});
+	};
+	deep.stores.json.range = function (arg1, arg2, uri, options) {
+		var self = this;
+		var start = arg1, end = arg2;
+		var def = deep.Deferred();
+		if(typeof start === 'object')
+		{
+			start = start.step*start.width;
+			end = ((start.step+1)*start.width)-1;
+		}
+		function success(jqXHR, data){
+			//console.log("range succes : arguments : ", arguments);
+			var rangePart = [];
+			var rangeResult = {};
+			var headers = jqXHR.getResponseHeader("content-range");
+			headers = headers.substring(6);
+			//console.log("browse ajax rrsult : headers " + JSON.stringify(headers))
+			if(headers)
+				rangePart = headers.split('/');
+
+			if(headers && rangePart && rangePart.length > 0)
+			{
+				rangeResult.range = rangePart[0];
+				if(rangeResult.range == "0--1")
+				{
+					rangeResult.totalCount = 0;
+					rangeResult.start = 0;
+					rangeResult.end = 0;
+				}
+				else
+				{
+					rangeResult.totalCount = parseInt(rangePart[1]);
+					var spl = rangePart[0].split("-");
+					rangeResult.start = parseInt(spl[0]);
+					rangeResult.end = parseInt(spl[1]);
+				}
+			}
+			else
+				console.log("ERROR deep.stores.json.range : range header missing !! ");
+			rangeResult = deep.utils.createStartEndRangeObject(rangeResult.start, rangeResult.end, rangeResult.totalCount);
+			rangeResult.results = data;
+			return rangeResult;
+		}
+		$.ajax({
+			beforeSend :function(req) {
+				req.setRequestHeader("Accept", "application/json; charset=utf-8");
+				req.setRequestHeader("range", "items=" +start+"-"+end);
+			},
+			type:"GET",
+			url:uri,
+			dataType:"application/json",
+			contentType:"application/json; charset=utf-8"
+
+		}).then(function(data, text, jqXHR) {
+			return def.resolve(success(jqXHR, data));
+		}, function  (jqXHR, statusText, errorThrown) {
+			//console.log("range failed : ", arguments);
+			if(jqXHR.status == 200 || jqXHR.status == 206)
+				def.resolve(success(jqXHR, JSON.parse(jqXHR.responseText)));
+			else
+				def.reject(new Error("deep.store.json.range failed : details : "+JSON.stringify(arguments)));
+		});
+
+		var d = deep(deep.promise(def))
+		.fail(function (argument) {
+			return error;
+		})
+		.done(function (rangeObject) {
+			d._entries = deep(rangeObject.results).query("./*").nodes();
+			//console.log("d._entries : ", d._entries)
+			return rangeObject;
+		})
+		.store(this)
+		.done(function (argument) {
+			d.range = deep.Handler.range;
+		});
+		return d;
+	};
+	deep.stores.json.create = function (name, uri, options) {
+		var store = deep.utils.bottom(deep.stores.json, {
+			options:options,
+			get:deep.compose.around(function (old) {
+				return function (id, options) {
+					if(id == "?" || !id)
+						id = "";
+					return old.apply(this,[uri+id, options]);
+				};
+			}),
+			post:deep.compose.around(function (old) {
+				return function (object, id, options) {
+					return old.apply(this,[object, uri+id, options]);
+				};
+			}),
+			put:deep.compose.around(function (old) {
+				return function (object, id, options) {
+					return old.apply(this,[object, uri+id, options]);
+				};
+			}),
+			patch:deep.compose.around(function (old) {
+				return function (object, id, options) {
+					return old.apply(this,[object, uri+id, options]);
+				};
+			}),
+			del:deep.compose.around(function (old) {
+				return function (id, options) {
+					return old.apply(this,[uri+id, options]);
+				};
+			}),
+			rpc:deep.compose.around(function (old) {
+				return function (method, params, id, options) {
+					return old.apply(this,[method, params, uri+id, options]);
+				};
+			}),
+			range:deep.compose.around(function (old) {
+				return function (start, end, options) {
+					return old.apply(this,[start, end, uri, options]);
+				};
+			}),
+			create:deep.collider.remove()
+		});
+		deep.stores[name] = store;
+		return store;
+	};
+	//__________________________________________________
+	deep.stores.html = new deep.store.DeepStore();
+	deep.stores.html.extensions = [
+		/(\.(html|htm|xhtm|xhtml)(\?.*)?)$/gi
+	];
+	deep.stores.html.get = function (id, options) {
+		options = options || {};
+		if(options.cache !== false && deep.mediaCache.cache[id])
+			return deep(deep.mediaCache.cache[id]).store(this);
+		var self = this;
+		var d = deep($.ajax({
+			beforeSend :function(req) {
+				writeJQueryDefaultHeaders(req);
+				req.setRequestHeader("Accept", "text/plain; charset=utf-8");
+			},
+			contentType: "text/plain; charset=utf-8",
+			url:id,
+			method:"GET"
+		})
+		.done(function(data, msg, jqXHR){
+			if(options.cache !== false || (self.options && self.options.cache !== false))
+				manageCache(data, id);
+			return data;
+		})
+		.fail(function(){
+			console.log("deep.store.html error : ", arguments);
+			return new Error("deep.store.html failed : "+id+" - \n\n"+JSON.stringify(arguments));
+		})).store(this);
+		if(options.cache !== false || (self.options && self.options.cache !== false))
+			manageCache(d, id);
+		return d;
+	};
+	//__________________________________________________
+	deep.stores.swig = new deep.store.DeepStore();
+	deep.stores.swig.extensions = [
+		/(\.(swig)(\?.*)?)$/gi
+	];
+	deep.stores.swig.get = function (id, options) {
+		options = options || {};
+		if(options.cache !== false && deep.mediaCache.cache["swig::"+id])
+			return deep(deep.mediaCache.cache["swig::"+id]).store(this);
+		var self = this;
+		var d = deep.store.html.get(id, {cache:false})
+		.done(function (data) {
+			var resi = swig.compile(data, { filename:utils.stripFirstSlash(id) });
+			delete deep.mediaCache.cache[id];
+			if((options && options.cache !== false)  || (self.options && self.options.cache !== false))
+				manageCache(resi, id);
+			return resi;
+		})
+		.store(this);
+		if((options && options.cache !== false)  || (self.options && self.options.cache !== false))
+			manageCache(d, "swig::"+id);
+		return d;
+	};
+	//__________________________________________________
+
+	return deep;
 });
