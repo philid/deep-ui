@@ -194,7 +194,7 @@ function(require, deep, VC, AC, Binder)
 	};
 
 	var manageCache = function (response, uri) {
-		console.log("manage cache : ", response, uri);
+		//console.log("manage cache : ", response, uri);
 		if(deep.mediaCache.reloadablesUriDico[uri])
 			return;
 		var count = 0;
@@ -204,7 +204,7 @@ function(require, deep, VC, AC, Binder)
 		if(count == deep.mediaCache.reloadablesRegExpDico.length)
 		{
 			deep.mediaCache.cache[uri] = response;
-			console.log("deep-ui : manageCache : retain !!!")
+			//console.log("deep-ui : manageCache : retain !!!")
 		}
 	};
 
