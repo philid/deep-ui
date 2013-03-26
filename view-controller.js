@@ -24,6 +24,9 @@ if(typeof define !== 'function')
 define(function (require)
 {
 	var deep = require("deep/deep");
+
+
+
 	var ViewController = 
 	{
 		renderables:{
@@ -80,13 +83,9 @@ define(function (require)
 		{
 			var controller = this;
 			var args = Array.prototype.slice.call(arguments).join(",");
-			return deep(this)
-			.position("controller")
-			.run("willRefresh")
-			.run("beforeRefresh")
-			.query("./renderables/["+args+"]")
-			.run(function() // load renderables
-			{
+
+
+			var loadRenderable = function () {
 				if(!this.how || this.condition === false)
 					return false;
 				if(this.condition)
@@ -100,41 +99,42 @@ define(function (require)
 					//console.log("view controller . render : what : ", this.what)
 					if(typeof this.what === 'string')
 					{
-					 	var what = deep.interpret(this.what, context);
-						objs.push(deep.request.retrieve(what, { callFunctions:false, root:context._deep_entry || context, acceptQueryThis:true }));
+						var what = deep.interpret(this.what, context);
+						objs.push(deep.get(what, { root:context._deep_entry || context }));
 					}
 					else if(typeof this.what === 'function')
 					{
 						objs.push(this.what.apply(context));
 					}
-					else 
+					else
 						objs.push(this.what);
 				}
-					
 				if(typeof this.how === "string")
 				{
 					var how = deep.interpret(this.how, context);
-					objs.push(deep.request.retrieve(how, { callFunctions:false, root:context._deep_entry || context, acceptQueryThis:true }));
-				}	
+					objs.push(deep.get(how, { root:context._deep_entry || context }));
+				}
 				if(typeof this.where === "string")
 				{
 					var where = deep.interpret(this.where, context);
-					objs.push(deep.request.retrieve(where, { callFunctions:false, root:context._deep_entry || context, acceptQueryThis:true }));
-				}	
+					objs.push(deep.get(where, { root:context._deep_entry || context }));
+				}
 				objs.unshift(renderable);
 				return deep.all(objs)
 				.fail(function(error){
 					console.log("Renderable rendering failed : ", error);
 					if(typeof renderable.fail === 'function')
 						return renderable.fail.apply(context, [error]) || error;
-					return [{}, function(){ return ""; }, function(){} ]
-				})
-			})
-			.done(function (alls) // apply render and place in dom orderedly
-			{ 
+					return [{}, function(){ return ""; }, function(){} ];
+				});
+			};
+
+			var applyRenderables = function (alls) // apply render and place in dom orderedly
+			{
+				var res = [];
 				alls.forEach(function( results )
 				{
-					if(results == false)
+					if(results === false)
 						return;
 					var renderable = results.shift();
 					var context = controller;
@@ -155,14 +155,33 @@ define(function (require)
 					{
 						console.log("Error while rendering : ", e);
 						if(typeof renderable.fail === 'function')
-							return renderable.fail.apply(context, [e]) || e;
-						return e;
+							return res.push(renderable.fail.apply(context, [e]) || e);
+						return res.push(e);
 					}
 					renderable.nodes = nodes;
 					if(typeof renderable.done === "function")
-						return renderable.done.apply(context, [nodes, r, what]) || [nodes, r, what];
-					return nodes || r;
+						return res.push(renderable.done.apply(context, [nodes, r, what]) || [nodes, r, what]);
+					return res.push([nodes, r, what]);
 				});
+				return res;
+			};
+
+
+
+			return deep(this)
+			.position("controller")
+			.run("willRefresh")
+			.run("beforeRefresh")
+			.query("./renderables/["+args+"]")
+			.run(loadRenderable)
+			.done(applyRenderables)
+			.up({
+				refresh:function () {
+					if(this.nodes && this.nodes.parents('html').length > 0)
+						return deep(this)
+						.run(loadRenderable)
+						.done(applyRenderables);
+				}
 			})
 			.back("controller")
 			.run(function () {
@@ -201,5 +220,7 @@ define(function (require)
 			});
 		}
 	};
+
+
 	return ViewController;
 });
