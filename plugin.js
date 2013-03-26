@@ -281,7 +281,8 @@ function(require, deep, VC, AC, Binder)
 	deep.stores.json.put = function (object, id) {
 		var self = this;
 		var d = null;
-		return d = deep($.ajax({
+		var def = deep.Deferred();
+		$.ajax({
 			beforeSend :function(req) {
 				writeJQueryDefaultHeaders(req);
 				req.setRequestHeader("Accept", "application/json; charset=utf-8;");
@@ -292,20 +293,22 @@ function(require, deep, VC, AC, Binder)
 			contentType:"application/json; charset=utf-8;",
 			data:JSON.stringify(object)
 		})
+		.done(function (success) {
+			def.resolve(success);
+		})
 		.fail(function  (jqXHR, textStatus, errorThrown) {
-			var test = $.parseJSON(jqXHR.responseText);
 			if(jqXHR.status < 300)
 			{
+				var test = $.parseJSON(jqXHR.responseText);
 				//console.log("DeepRequest.post : error but status 2xx : ", test, " - status provided : "+jqXHR.status);
 				if(typeof test === 'string')
 					test = $.parseJSON(test);
-				return test;
+				def.resolve(test);
 			}
 			else
-			{
-				return new Error("deep.store.json.put failed : "+id+" - details : "+JSON.stringify(arguments));
-			}
-		}))
+				def.reject(new Error("deep.store.json.put failed : "+id+" - details : "+JSON.stringify(arguments)));
+		});
+		return d = deep(deep.promise(def))
 		.store(this)
 		.done(function (argument) {
 			d.range = deep.Handler.range;
@@ -314,7 +317,8 @@ function(require, deep, VC, AC, Binder)
 	deep.stores.json.post = function (object, id) {
 		var self = this;
 		var d = null;
-		return d = deep($.ajax({
+		var def = deep.Deferred();
+		$.ajax({
 			beforeSend :function(req) {
 				writeJQueryDefaultHeaders(req);
 				req.setRequestHeader("Accept", "application/json; charset=utf-8;");
@@ -325,35 +329,8 @@ function(require, deep, VC, AC, Binder)
 			contentType:"application/json; charset=utf-8;",
 			data:JSON.stringify(object)
 		})
-		.fail(function  (jqXHR, textStatus, errorThrown) {
-			var test = $.parseJSON(jqXHR.responseText);
-			if(jqXHR.status < 300)
-			{
-				//console.log("DeepRequest.post : error but status 2xx : ", test, " - status provided : "+jqXHR.status);
-				if(typeof test === 'string')
-					test = $.parseJSON(test);
-				return test;
-			}
-			else
-			{
-				return new Error("deep.store.json.post failed : "+id+" - details : "+JSON.stringify(arguments));
-			}
-		}))
-		.store(this)
-		.done(function (argument) {
-			d.range = deep.Handler.range;
-		});
-	};
-	deep.stores.json.del = function (id) {
-		var self = this;
-		var d = null;
-		return d = deep($.ajax({
-			beforeSend :function(req) {
-				writeJQueryDefaultHeaders(req);
-				req.setRequestHeader("Accept", "application/json; charset=utf-8;");
-			},
-			type:"DELETE",
-			url:id
+		.done(function (success) {
+			def.resolve(success);
 		})
 		.fail(function  (jqXHR, textStatus, errorThrown) {
 			var test = $.parseJSON(jqXHR.responseText);
@@ -362,13 +339,49 @@ function(require, deep, VC, AC, Binder)
 				//console.log("DeepRequest.post : error but status 2xx : ", test, " - status provided : "+jqXHR.status);
 				if(typeof test === 'string')
 					test = $.parseJSON(test);
-				return test;
+				def.resolve(test);
 			}
 			else
 			{
-				return new Error("deep.store.json.del failed : "+id+" - details : "+JSON.stringify(arguments));
+				def.reject(new Error("deep.store.json.post failed : "+id+" - details : "+JSON.stringify(arguments)));
 			}
-		}))
+		});
+		return d = deep(deep.promise(def))
+		.store(this)
+		.done(function () {
+			d.range = deep.Handler.range;
+		});
+	};
+	deep.stores.json.del = function (id) {
+		var self = this;
+		var d = null;
+		var def = deep.Deferred();
+		$.ajax({
+			beforeSend :function(req) {
+				writeJQueryDefaultHeaders(req);
+				req.setRequestHeader("Accept", "application/json; charset=utf-8;");
+			},
+			type:"DELETE",
+			url:id
+		})
+		.done(function (success) {
+			def.resolve(success);
+		})
+		.fail(function  (jqXHR, textStatus, errorThrown) {
+			var test = $.parseJSON(jqXHR.responseText);
+			if(jqXHR.status < 300)
+			{
+				//console.log("DeepRequest.post : error but status 2xx : ", test, " - status provided : "+jqXHR.status);
+				if(typeof test === 'string')
+					test = $.parseJSON(test);
+				def.resolve(test);
+			}
+			else
+			{
+				def.reject(new Error("deep.store.json.del failed : "+id+" - details : "+JSON.stringify(arguments)));
+			}
+		});
+		return d = deep(deep.promise(def))
 		.store(this)
 		.done(function (argument) {
 			d.range = deep.Handler.range;
@@ -377,7 +390,8 @@ function(require, deep, VC, AC, Binder)
 	deep.stores.json.patch = function (object, id) {
 		var self = this;
 		var d = null;
-		return d = deep($.ajax({
+		var def = deep.Deferred();
+		$.ajax({
 			beforeSend :function(req) {
 				writeJQueryDefaultHeaders(req);
 				req.setRequestHeader("Accept", "application/json; charset=utf-8;");
@@ -388,20 +402,24 @@ function(require, deep, VC, AC, Binder)
 			contentType:"application/json; charset=utf-8;",
 			data:JSON.stringify(object)
 		})
+		.done(function (success) {
+			def.resolve(success);
+		})
 		.fail(function  (jqXHR, textStatus, errorThrown)
 		{
-			var test = $.parseJSON(jqXHR.responseText);
 			if(jqXHR.status < 300)
 			{
+				var test = $.parseJSON(jqXHR.responseText);
 				//console.log("DeepRequest.post : error but status 2xx : ", test, " - status provided : "+jqXHR.status);
 				if(typeof test === 'string')
 					test = $.parseJSON(test);
-				return test;
+				def.resolve(test);
 			}
 			else
-				return new Error("deep.store.json.patch failed : "+id+" - details : "+JSON.stringify(arguments));
+				def.reject(new Error("deep.store.json.patch failed : "+id+" - details : "+JSON.stringify(arguments)));
 				//deferred.reject({msg:"DeepRequest.patch failed : "+info.request, status:jqXHR.status, details:arguments, uri:id});
-		}))
+		});
+		return d = deep(deep.promise(def))
 		.store(this)
 		.done(function (argument) {
 			d.range = deep.Handler.range;
@@ -410,7 +428,8 @@ function(require, deep, VC, AC, Binder)
 	deep.stores.json.bulk = function (arr, uri, options) {
 		var self = this;
 		var d = null;
-		return d = deep($.ajax({
+		var def = deep.Deferred();
+		$.ajax({
 			beforeSend :function(req) {
 				writeJQueryDefaultHeaders(req);
 				req.setRequestHeader("Accept", "application/json; charset=utf-8;");
@@ -421,18 +440,22 @@ function(require, deep, VC, AC, Binder)
 			contentType:"message/json; charset=utf-8;",
 			data:JSON.stringify(arr)
 		})
+		.done(function (success) {
+			def.resolve(success);
+		})
 		.fail(function  (jqXHR, textStatus, errorThrown)
 		{
-			var test = $.parseJSON(jqXHR.responseText);
 			if(jqXHR.status < 300)
 			{
+				var test = $.parseJSON(jqXHR.responseText);
 				if(typeof test === 'string')
 					test = $.parseJSON(test);
-				return test;
+				def.resolve(test);
 			}
 			else
-				return new Error("deep.store.json.bulk failed : "+uri+" - details : "+JSON.stringify(arguments));
-		}))
+				def.reject(new Error("deep.store.json.bulk failed : "+uri+" - details : "+JSON.stringify(arguments)));
+		});
+		return d = deep(deep.promise(def))
 		.store(this)
 		.done(function () {
 			d.range = deep.Handler.range;
@@ -442,7 +465,8 @@ function(require, deep, VC, AC, Binder)
 		var self = this;
 		var callId = "call"+new Date().valueOf();
 		var d = null;
-		return d = deep($.ajax({
+		var def = deep.Deferred();
+		$.ajax({
 			beforeSend :function(req) {
 				writeJQueryDefaultHeaders(req);
 				req.setRequestHeader("Accept", "application/json; charset=utf-8;");
@@ -457,20 +481,22 @@ function(require, deep, VC, AC, Binder)
 				params:params||[]
 			})
 		})
+		.done(function (success) {
+			def.resolve(success);
+		})
 		.fail(function  (jqXHR, textStatus, errorThrown)
 		{
-			var test = $.parseJSON(jqXHR.responseText);
 			if(jqXHR.status < 300)
 			{
-				//console.log("DeepRequest.post : error but status 2xx : ", test, " - status provided : "+jqXHR.status);
+				var test = $.parseJSON(jqXHR.responseText);
 				if(typeof test === 'string')
 					test = $.parseJSON(test);
-				return test;
+				def.resolve(test);
 			}
 			else
-				return new Error("deep.store.json.patch failed : "+id+" - details : "+JSON.stringify(arguments));
-				//deferred.reject({msg:"DeepRequest.patch failed : "+info.request, status:jqXHR.status, details:arguments, uri:id});
-		}))
+				def.reject(new Error("deep.store.json.patch failed : "+id+" - details : "+JSON.stringify(arguments)));
+		});
+		return d = deep(deep.promise(def))
 		.store(this)
 		.done(function (argument) {
 			d.range = deep.Handler.range;
@@ -486,12 +512,10 @@ function(require, deep, VC, AC, Binder)
 			end = ((start.step+1)*start.width)-1;
 		}
 		function success(jqXHR, data){
-			//console.log("range succes : arguments : ", arguments);
 			var rangePart = [];
 			var rangeResult = {};
 			var headers = jqXHR.getResponseHeader("content-range");
 			headers = headers.substring(6);
-			//console.log("browse ajax rrsult : headers " + JSON.stringify(headers))
 			if(headers)
 				rangePart = headers.split('/');
 
@@ -531,7 +555,6 @@ function(require, deep, VC, AC, Binder)
 		}).then(function(data, text, jqXHR) {
 			return def.resolve(success(jqXHR, data));
 		}, function  (jqXHR, statusText, errorThrown) {
-			//console.log("range failed : ", arguments);
 			if(jqXHR.status == 200 || jqXHR.status == 206)
 				def.resolve(success(jqXHR, JSON.parse(jqXHR.responseText)));
 			else
@@ -539,12 +562,8 @@ function(require, deep, VC, AC, Binder)
 		});
 
 		var d = deep(deep.promise(def))
-		.fail(function (argument) {
-			return error;
-		})
 		.done(function (rangeObject) {
 			d._entries = deep(rangeObject.results).query("./*").nodes();
-			//console.log("d._entries : ", d._entries)
 			return rangeObject;
 		})
 		.store(this)
