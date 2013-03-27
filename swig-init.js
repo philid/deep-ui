@@ -19,6 +19,10 @@ define(function(require){
 		outArray:function(input, array){
 			return !utils.inArray(input, array);
 		},
+		select:function (input, what) {
+			console.log("swig.filter.select : ", input, what);
+			return utils.retrieveValueByPath(input, what);
+		},
 		notnull : function(input) {
 			if(input == null || input == "null")
 				return "";
