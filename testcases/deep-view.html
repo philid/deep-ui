@@ -2,163 +2,37 @@
 <script type="text/javascript">
 	//console.log("deep-copy.html loaded : ");
 (function(){
-	var deepEqual = require("deep/utils").deepEqual;
-	var ViewController = require("deep-ui/view-controller");
-	var ListController = require("deep-ui/list-controller");
-	var promise = require("deep/promise");
-	require("test-controller.js")
+	var deep = require("deep/deep");
 	var success = 0;
 	var failed = 0;
 	var count = 0;
 
-	function doDeepEqualTest(title, a, b, resultNeeded)
+
+	function report(result)
 	{
+		//console.log("deep.load RESULT = ", result.equal);
 		count++;
-		$("#content-container").append("<br/>("+count+") <strong>"+title+"</strong><br/>");
-		$("#content-container").append("a : "+JSON.stringify(a, null, ' ')+"<br/>");
-		$("#content-container").append("b : "+JSON.stringify(b, null, ' ')+"<br/>");
-		var ok = deepEqual(a,b);
-		if(ok == resultNeeded)
+		//$("#content-container").append("<br/>("+count+") <strong>"+title+"</strong><br/>")
+		//$("#content-container").append("result : <br/>"+JSON.stringify(r, null, ' '));
+		//$("#content-container").append("<br/>result needed : <br/>"+JSON.stringify(result, null, ' '));
+		var ok = result.equal;
+		if(ok)
 			success++;
-		else {
+		else
+		{
+			//console.log("deep-copy : needed result not matched : "+title+" ("+count+")")
 			failed++;
-			//console.warning("deep-equal : needed result not matched : "+title+" ("+count+")")
 		}
-		$("#content-container").append("<strong style=\"color:#"+((ok  == resultNeeded )?"000000":"FF0000")+"\">test :</strong>", JSON.stringify(ok, null, ' ')+"<br/>");
-	}
-	var promises = [];
-
-//	printInterlude("deep-equal");
-
-deep({
-	    msg:"hello { names }"
-	})
-	.pushHandlerTo(tests)
-	.query("./msg")
-	.interpret("./json/simple.json")
-	.equal("hello cedric", report);
-
-	var view = new ViewController();
-	view.applyLayer({
-		context:{
-			test:"/common/json/input-{{ __this.part }}.json#/testvar§{\"myProp\":12}",
-			test2:"/common/json/input-{{ __this.part }}.json§{\"myProp\":12}#/testvar",
-			test3:"json::/common/json/input-{{ __this.part }}.json§{\"myProp\":12}#/testvar"
-		}
-	});
-
-	view.applyLayer({
-		part:"context"
-	});
-
-	var deferred = promise.Deferred();
-	view.load().then(function(view){
-		console.log("layer loaded : ", JSON.stringify(view.context, null, ' '));
-		doDeepEqualTest("interpretation simple", view.context, { 
-
-				test:["TEST is OK"],
-				test2:["TEST is OK"],
-				test3:["TEST is OK"]
-
-		}, true)
-		//printReport("view-controller", success, failed, count);
-		deferred.resolve(this);
-	})
-	promises.push(promise.promise(deferred));
-
-//	printInterlude("inherits base layer");
-
-
-
-	var baseLayer = {
-		subs:{
-			test:{
-				controller:"instance::test-controller.js"
-			}
-		}
-	}
-	var view4 = new ViewController();
-	view4.applyLayer({
-		name:"view1",
-		"inherits":[baseLayer],
-		subs:{
-			test:{
-				context:{
-					hola:"hello"
-				}
-			}
-		}
-	});
-		
-	var view5 = new ViewController();
-	view5.applyLayer({
-		name:"view5",
-		"inherits":[baseLayer],
-		subs:{
-			test:{
-				context:{
-					hola:"bye"
-				}
-			}
-		}
-	});
-	var deferred2 = promise.Deferred();
-	promise.all([view4.load(), view5.load()]).then(function(views){
-		doDeepEqualTest("inherits base layer with subs then customise subs", view4.subs.test.context, view5.subs.test.context, false);
-		promise.all([view4.load(), view5.load()]).then(function(){
-			doDeepEqualTest("second inherits base layer with subs then customise subs", view4.subs.test.context, view5.subs.test.context, false);
-			deferred2.resolve(this);
-		})
-	})
-	promises.push(promise.promise(deferred2));
-	var baseLayer = {
-		items:{
-			test:{
-				controller:"instance::test-controller.js"
-			}
-		}
+	//	$("#content-container").append("<br/><strong  style=\"color:#"+((ok)?"000000":"FF0000")+"\">test :</strong>", JSON.stringify(ok, null, ' ')+"<br/>");
 	}
 
-	var view = new ListController();
-	view.applyLayer({
-		name:"view1",
-		"inherits":[baseLayer],
-		items:{
-			test:{
-				context:{
-					hola:"hello"
-				}
-			}
-		}
-	});
-		
-	var view2 = new ListController();
-	view2.applyLayer({
-		name:"view2",
-		"inherits":[baseLayer],
-		items:{
-			test:{
-				context:{
-					hola:"bye"
-				}
-			}
-		}
-	});
+	var tests = [];
 
-	var deferred3 = promise.Deferred();
-	promise.all([view.load(), view2.load()]).then(function(){
-		doDeepEqualTest("inherits base layer with items then customise items", view.items.test.context, view2.items.test.context, false);
-		promise.all([view.load(), view2.load()]).then(function(){
-			doDeepEqualTest("second inherits base layer with items then customise items", view.items.test.context, view2.items.test.context, false);
-			deferred3.resolve(this);
-		})
-	});
 
-	promises.push(promise.promise(deferred3));
+	
 
-	promise.all(promises).then(function(){
-		printReport("view-controller", success, failed, count);
-	})
+
+
 
 
 
@@ -167,7 +41,6 @@ deep({
 var a = [{names:"john"},{names:"janis"},{names:"jim"}];
 
 deep(a)
-.query("./*")
 .render({
     how:"swig::./templates/simple.html",
     where:deep.ui.appendTo("#content-container"),
@@ -184,7 +57,7 @@ var obj = {
   backgrounds:[ deep.ui.ViewController ],
   datas:{ names:"john" },
   externals:{
-  		brol:"json::brol.json"
+  		brol:"json::./json/simple.json"
   },
   renderables:{
      brol:{

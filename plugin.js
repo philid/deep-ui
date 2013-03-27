@@ -232,8 +232,8 @@ function(require, deep, VC, AC, Binder)
 		if(!noCache && id !== "" && deep.mediaCache.cache[id])
 		{
 			d = deep(deep.mediaCache.cache[id]).store(this);
-			if(deep.mediaCache.cache[id] instanceof Array)
-				d.query("./*");
+			//if(deep.mediaCache.cache[id] instanceof Array)
+			//	d.query("./*");
 			return d;
 		}
 		var self = this;
@@ -262,7 +262,7 @@ function(require, deep, VC, AC, Binder)
 		.done(function (datas) {
 			//console.log("json.get : result : ", datas);
 			if(datas instanceof Array)
-				d._entries = deep(datas).query("./*").nodes();
+				d._entries = deep(datas).nodes();
 			else
 				d._entries = [deep.Querier.createRootNode(datas)];
 			return datas;
@@ -563,7 +563,7 @@ function(require, deep, VC, AC, Binder)
 
 		var d = deep(deep.promise(def))
 		.done(function (rangeObject) {
-			d._entries = deep(rangeObject.results).query("./*").nodes();
+			d._entries = deep(rangeObject.results).nodes();
 			return rangeObject;
 		})
 		.store(this)
