@@ -9,7 +9,6 @@ function(require, deep, VC, AC, Binder)
 	//_____________________________________________________________ Custom Chain Handler
 
 	var layer = {
-		prototype: {
 			post: function(uri, options) {
 				options = options || {};
 				var self = this;
@@ -110,9 +109,8 @@ function(require, deep, VC, AC, Binder)
 				deep.chain.addInQueue.apply(this, [func]);
 				return this;
 			}
-		}
 	};
-	deep.utils.up(layer.prototype, deep.Handler.prototype);
+	deep.utils.up(layer, deep.Handler.prototype);
 
 	//__________________________________________________________________________ Additional API
 
@@ -261,15 +259,13 @@ function(require, deep, VC, AC, Binder)
 		}))
 		.done(function (datas) {
 			//console.log("json.get : result : ", datas);
-			if(datas instanceof Array)
-				d._entries = deep(datas).nodes();
-			else
-				d._entries = [deep.Querier.createRootNode(datas)];
-			return datas;
+			return deep(datas).nodes(function (nodes) {
+			 	d._entries = nodes;
+			 });
 		})
 		.store(this)
 		.done(function (success) {
-			//console.log("json.get : result 2 : ", success);
+			//console.log("json.get : "+id+" : result : ", success);
 			d.range = deep.Handler.range;
 		});
 		if(!noCache && (options && options.cache !== false)  || (self.options && self.options.cache !== false))
