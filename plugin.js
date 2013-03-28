@@ -218,24 +218,18 @@ function(require, deep, VC, AC, Binder)
 	deep.stores.json.get = function (id, options) {
 		//console.log("json.get : ", id);
 		var noCache = true;
-		for (var i = 0; i < this.extensions.length; ++i) {
+		for (var i = 0; i < this.extensions.length; ++i)
 			if(this.extensions[i].test(id))
 			{
 				noCache = false;
 				break;
 			}
-		};
 
-		var d = null;
 		if(!noCache && id !== "" && deep.mediaCache.cache[id])
-		{
-			d = deep(deep.mediaCache.cache[id]).store(this);
-			//if(deep.mediaCache.cache[id] instanceof Array)
-			//	d.query("./*");
-			return d;
-		}
+			return deep(deep.mediaCache.cache[id]).store(this);
+
 		var self = this;
-		d = deep($.ajax({
+		return deep($.ajax({
 			beforeSend :function(req) {
 				writeJQueryDefaultHeaders(req);
 				req.setRequestHeader("Accept", "application/json; charset=utf-8");
@@ -254,29 +248,25 @@ function(require, deep, VC, AC, Binder)
 			return data;
 		})
 		.fail(function(){
-			console.log("deep.store.json error : ", arguments);
+			console.log("deep.store.json.get error : ",id," - ", arguments);
 			return new Error("deep.store.json failed : "+id+" - \n\n"+JSON.stringify(arguments));
 		}))
-		.done(function (datas) {
+		.done(function (datas, handler) {
 			//console.log("json.get : result : ", datas);
 			return deep(datas).nodes(function (nodes) {
-			 	d._entries = nodes;
-			 });
+				handler._entries = nodes;
+			});
 		})
 		.store(this)
-		.done(function (success) {
+		.done(function (success, handler) {
 			//console.log("json.get : "+id+" : result : ", success);
-			d.range = deep.Handler.range;
+			handler.range = deep.Handler.range;
+			if(!noCache && (options && options.cache !== false)  || (self.options && self.options.cache !== false))
+				manageCache(handler, id);
 		});
-		if(!noCache && (options && options.cache !== false)  || (self.options && self.options.cache !== false))
-			manageCache(d, id);
-
-		//console.log("json.get : handler ? ", d instanceof deep.Handler);
-		return d;
 	};
 	deep.stores.json.put = function (object, id) {
 		var self = this;
-		var d = null;
 		var def = deep.Deferred();
 		$.ajax({
 			beforeSend :function(req) {
@@ -304,15 +294,14 @@ function(require, deep, VC, AC, Binder)
 			else
 				def.reject(new Error("deep.store.json.put failed : "+id+" - details : "+JSON.stringify(arguments)));
 		});
-		return d = deep(deep.promise(def))
+		return deep(deep.promise(def))
 		.store(this)
-		.done(function (argument) {
-			d.range = deep.Handler.range;
+		.done(function (success, handler) {
+			handler.range = deep.Handler.range;
 		});
 	};
 	deep.stores.json.post = function (object, id) {
 		var self = this;
-		var d = null;
 		var def = deep.Deferred();
 		$.ajax({
 			beforeSend :function(req) {
@@ -342,15 +331,14 @@ function(require, deep, VC, AC, Binder)
 				def.reject(new Error("deep.store.json.post failed : "+id+" - details : "+JSON.stringify(arguments)));
 			}
 		});
-		return d = deep(deep.promise(def))
+		return deep(deep.promise(def))
 		.store(this)
-		.done(function () {
-			d.range = deep.Handler.range;
+		.done(function (success, handler) {
+			handler.range = deep.Handler.range;
 		});
 	};
 	deep.stores.json.del = function (id) {
 		var self = this;
-		var d = null;
 		var def = deep.Deferred();
 		$.ajax({
 			beforeSend :function(req) {
@@ -377,15 +365,14 @@ function(require, deep, VC, AC, Binder)
 				def.reject(new Error("deep.store.json.del failed : "+id+" - details : "+JSON.stringify(arguments)));
 			}
 		});
-		return d = deep(deep.promise(def))
+		return deep(deep.promise(def))
 		.store(this)
-		.done(function (argument) {
-			d.range = deep.Handler.range;
+		.done(function (success, handler) {
+			handler.range = deep.Handler.range;
 		});
 	};
 	deep.stores.json.patch = function (object, id) {
 		var self = this;
-		var d = null;
 		var def = deep.Deferred();
 		$.ajax({
 			beforeSend :function(req) {
@@ -415,15 +402,14 @@ function(require, deep, VC, AC, Binder)
 				def.reject(new Error("deep.store.json.patch failed : "+id+" - details : "+JSON.stringify(arguments)));
 				//deferred.reject({msg:"DeepRequest.patch failed : "+info.request, status:jqXHR.status, details:arguments, uri:id});
 		});
-		return d = deep(deep.promise(def))
+		return deep(deep.promise(def))
 		.store(this)
-		.done(function (argument) {
-			d.range = deep.Handler.range;
+		.done(function (argument, handler) {
+			handler.range = deep.Handler.range;
 		});
 	};
 	deep.stores.json.bulk = function (arr, uri, options) {
 		var self = this;
-		var d = null;
 		var def = deep.Deferred();
 		$.ajax({
 			beforeSend :function(req) {
@@ -451,23 +437,22 @@ function(require, deep, VC, AC, Binder)
 			else
 				def.reject(new Error("deep.store.json.bulk failed : "+uri+" - details : "+JSON.stringify(arguments)));
 		});
-		return d = deep(deep.promise(def))
+		return deep(deep.promise(def))
 		.store(this)
-		.done(function () {
-			d.range = deep.Handler.range;
+		.done(function (success, handler) {
+			handler.range = deep.Handler.range;
 		});
 	};
 	deep.stores.json.rpc = function (method, params, id) {
 		var self = this;
 		var callId = "call"+new Date().valueOf();
-		var d = null;
 		var def = deep.Deferred();
 		$.ajax({
 			beforeSend :function(req) {
 				writeJQueryDefaultHeaders(req);
 				req.setRequestHeader("Accept", "application/json; charset=utf-8;");
 			},
-			type:"PATCH",
+			type:"POST",
 			url:id,
 			dataType:"application/json; charset=utf-8;",
 			contentType:"application/json; charset=utf-8;",
@@ -490,12 +475,12 @@ function(require, deep, VC, AC, Binder)
 				def.resolve(test);
 			}
 			else
-				def.reject(new Error("deep.store.json.patch failed : "+id+" - details : "+JSON.stringify(arguments)));
+				def.reject(new Error("deep.store.json.rpc failed : "+id+" - details : "+JSON.stringify(arguments)));
 		});
-		return d = deep(deep.promise(def))
+		return deep(deep.promise(def))
 		.store(this)
-		.done(function (argument) {
-			d.range = deep.Handler.range;
+		.done(function (success, handler) {
+			handler.range = deep.Handler.range;
 		});
 	};
 	deep.stores.json.range = function (arg1, arg2, query, options) {
@@ -557,18 +542,18 @@ function(require, deep, VC, AC, Binder)
 				def.reject(new Error("deep.store.json.range failed : details : "+JSON.stringify(arguments)));
 		});
 
-		var d = deep(deep.promise(def))
-		.done(function (rangeObject) {
-			d._entries = deep(rangeObject.results).nodes();
+		return deep(deep.promise(def))
+		.done(function (rangeObject, handler) {
+			handler._entries = deep(rangeObject.results).nodes();
 			return rangeObject;
 		})
 		.store(this)
-		.done(function (argument) {
-			d.range = deep.Handler.range;
+		.done(function (success, handler) {
+			handler.range = deep.Handler.range;
 		});
-		return d;
 	};
-	deep.stores.json.create = function (name, uri, options) {
+	deep.stores.json.create = function (name, uri, options) 
+	{
 		var store = deep.utils.bottom(deep.stores.json, {
 			options:options,
 			get:deep.compose.around(function (old) {
