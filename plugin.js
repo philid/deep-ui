@@ -498,7 +498,7 @@ function(require, deep, VC, AC, Binder)
 			d.range = deep.Handler.range;
 		});
 	};
-	deep.stores.json.range = function (arg1, arg2, uri, options) {
+	deep.stores.json.range = function (arg1, arg2, query, options) {
 		var self = this;
 		var start = arg1, end = arg2;
 		var def = deep.Deferred();
@@ -544,7 +544,7 @@ function(require, deep, VC, AC, Binder)
 				req.setRequestHeader("range", "items=" +start+"-"+end);
 			},
 			type:"GET",
-			url:uri,
+			url:query,
 			dataType:"application/json",
 			contentType:"application/json; charset=utf-8"
 
@@ -580,37 +580,44 @@ function(require, deep, VC, AC, Binder)
 			}),
 			post:deep.compose.around(function (old) {
 				return function (object, id, options) {
+					id = id || "";
 					return old.apply(this,[object, uri+id, options]);
 				};
 			}),
 			put:deep.compose.around(function (old) {
 				return function (object, id, options) {
+					id = id || "";
 					return old.apply(this,[object, uri+id, options]);
 				};
 			}),
 			patch:deep.compose.around(function (old) {
 				return function (object, id, options) {
+					id = id || "";
 					return old.apply(this,[object, uri+id, options]);
 				};
 			}),
 			del:deep.compose.around(function (old) {
 				return function (id, options) {
+					id = id || "";
 					return old.apply(this,[uri+id, options]);
 				};
 			}),
 			rpc:deep.compose.around(function (old) {
 				return function (method, params, id, options) {
+					id = id || "";
 					return old.apply(this,[method, params, uri+id, options]);
 				};
 			}),
 			range:deep.compose.around(function (old) {
-				return function (start, end, options) {
-					return old.apply(this,[start, end, uri, options]);
+				return function (start, end, query, options) {
+					query = query || "";
+					return old.apply(this,[start, end, uri+query, options]);
 				};
 			}),
 			create:deep.collider.remove()
 		});
 		deep.stores[name] = store;
+		store.name = name;
 		return store;
 	};
 	//__________________________________________________
