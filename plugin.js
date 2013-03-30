@@ -229,7 +229,7 @@ function(require, deep, VC, AC, Binder)
 			return deep(deep.mediaCache.cache[id]).store(this);
 
 		var self = this;
-		return deep($.ajax({
+		var d = deep($.ajax({
 			beforeSend :function(req) {
 				writeJQueryDefaultHeaders(req);
 				req.setRequestHeader("Accept", "application/json; charset=utf-8");
@@ -261,9 +261,11 @@ function(require, deep, VC, AC, Binder)
 		.done(function (success, handler) {
 			//console.log("json.get : "+id+" : result : ", success);
 			handler.range = deep.Handler.range;
-			if(!noCache && (options && options.cache !== false)  || (self.options && self.options.cache !== false))
-				manageCache(handler, id);
+			
 		});
+		if(!noCache && (options && options.cache !== false)  || (self.options && self.options.cache !== false))
+			manageCache(d, id);
+		return d;
 	};
 	deep.stores.json.put = function (object, id) {
 		var self = this;
@@ -483,7 +485,8 @@ function(require, deep, VC, AC, Binder)
 			handler.range = deep.Handler.range;
 		});
 	};
-	deep.stores.json.range = function (arg1, arg2, query, options) {
+	deep.stores.json.range = function (arg1, arg2, query, options)
+	{
 		var self = this;
 		var start = arg1, end = arg2;
 		var def = deep.Deferred();
@@ -552,7 +555,7 @@ function(require, deep, VC, AC, Binder)
 			handler.range = deep.Handler.range;
 		});
 	};
-	deep.stores.json.create = function (name, uri, options) 
+	deep.stores.json.create = function (name, uri, options)
 	{
 		var store = deep.utils.bottom(deep.stores.json, {
 			options:options,
@@ -632,7 +635,8 @@ function(require, deep, VC, AC, Binder)
 		.fail(function(){
 			console.log("deep.store.html error : ", arguments);
 			return new Error("deep.store.html failed : "+id+" - \n\n"+JSON.stringify(arguments));
-		})).store(this);
+		}))
+		.store(this);
 		if(options.cache !== false || (self.options && self.options.cache !== false))
 			manageCache(d, id);
 		return d;
