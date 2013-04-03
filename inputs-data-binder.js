@@ -194,7 +194,7 @@ define( function(require){
 	var deep = require("deep/deep");
 
 	var InputsDataBinder =  function (){
-		console.log("InputsDataBinder Constructor : ", this);
+		//console.log("InputsDataBinder Constructor : ", this);
 	};
 	
 	InputsDataBinder.prototype.datas = null;
@@ -239,7 +239,7 @@ define( function(require){
 
 	InputsDataBinder.prototype.toDatas = function toDatas()
 	{
-		console.log("InputsDataBinder.toDatas ")	
+		//console.log("InputsDataBinder.toDatas ")	
 		this.output = {};
 		this.createPathMap();
 
