@@ -522,7 +522,7 @@ function(require, deep, VC, AC, Binder)
 			}
 			else
 				console.log("ERROR deep.stores.json.range : range header missing !! ");
-			rangeResult = deep.utils.createStartEndRangeObject(rangeResult.start, rangeResult.end, rangeResult.totalCount);
+			rangeResult = deep.utils.createRangeObject(rangeResult.start, rangeResult.end, rangeResult.totalCount);
 			rangeResult.results = data;
 			return rangeResult;
 		}
