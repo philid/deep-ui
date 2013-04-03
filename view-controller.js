@@ -82,7 +82,7 @@ define(function (require)
 		refresh:deep.compose.createIfNecessary().after(function () 
 		{
 			var controller = this;
-			var args = Array.prototype.slice.call(arguments).join(",");
+			var args = Array.prototype.slice.call(arguments);
 
 
 			var loadRenderable = function () {
@@ -172,7 +172,7 @@ define(function (require)
 			.position("controller")
 			.run("willRefresh")
 			.run("beforeRefresh")
-			.query("./renderables/["+args+"]")
+			.query("./renderables/["+args.join(",")+"]")
 			.run(loadRenderable)
 			.done(applyRenderables)
 			.up({
@@ -191,9 +191,9 @@ define(function (require)
 			//.log("____________________________________________________________________ refreshed")
 			.run(function () {
 				var values  = deep(this.renderables).query("./*/nodes").values();
-				if(this.setBehaviour)
+				if(this.setBehaviour && args.length == 0)
 					this.setBehaviour(values);
-				if(this.hasRefresh)
+				if(this.hasRefresh && args.length == 0)
 					this.hasRefresh(values);
 			});
 		}),
