@@ -456,8 +456,8 @@ function(require, deep, VC, AC, Binder)
 			},
 			type:"POST",
 			url:id,
-			dataType:"application/json; charset=utf-8;",
-			contentType:"application/json; charset=utf-8;",
+			//dataType:"application/json-rpc; charset=utf-8;",
+			contentType:"application/json-rpc; charset=utf-8;",
 			data:JSON.stringify({
 				id:callId,
 				method:method,
