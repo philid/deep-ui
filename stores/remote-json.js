@@ -17,13 +17,16 @@ define(function (require)
 	deep.stores.json.get = function (id, options) {
 		//console.log("json.get : ", id);
 		var noCache = true;
-		for (var i = 0; i < this.extensions.length; ++i)
-			if(this.extensions[i].test(id))
+		if(id !== "")
+			for (var i = 0; i < this.extensions.length; ++i)
 			{
-				noCache = false;
-				break;
+				var res = id.match(this.extensions[i]);
+				if(res && res.length > 0)
+				{
+					noCache = false;
+					break;
+				}
 			}
-
 		if(!noCache && id !== "" && deep.mediaCache.cache[id])
 			return deep(deep.mediaCache.cache[id]).store(this);
 
