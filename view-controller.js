@@ -40,11 +40,13 @@ define(function (require)
 		//translations:null,
 		load:deep.compose.createIfNecessary().after(function(arg) 
 		{
+			//console.log("ViewController.load : ", arg)
 			if(this._externals)
 				this.externals = deep.utils.copy(this._externals);
 			else if(this.externals)
 				this._externals = deep.utils.copy(this.externals);
-			return  deep(this).query("./externals").deepInterpret(this).deepLoad();
+			return  deep(this).query("./externals").deepLoad(this);
+			//.log("vc : load result ").log();
 		}),
 		/*render:deep.compose.createIfNecessary().after(function () 
 		{
