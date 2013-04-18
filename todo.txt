@@ -1,0 +1,92 @@
+TODO : 
+
+routes :
+
+		routes:{
+			campaign:{
+				_controller_:"app::/views/campaign",
+				_id_:{
+					_output_:{
+						return this.campaignId;
+					},
+					_handler_:function(rest, current)
+					{
+						this.campaignId = current;
+						if(rest.length === 0)
+							rest.push("information");
+						return ["self","renderable2"];
+					},
+					information:{
+						_controller_:"app::/views/campaign/tabs/information"
+					},
+					comments:{
+						_controller_:"app::/views/campaign/tabs/comments"
+					}
+				},
+				published:{
+					_handler_:function(rest, current){
+						this._externals.campaign = "campaign::?status=published";
+					}
+				}
+			}
+		}
+
+		deep
+		.route("/campaign/12/information")
+		.done(function(success){
+			// route updated in browser window : if server side : use window content to get html
+		})
+
+		algo for route management : 
+
+		var queue = [];
+		var currentQueueItem = null;
+		var ctrl = null;
+
+		readPaths(currentEntry, rest, current)
+
+			var currentPart = parse(current); // convert _id_, _int_, etc
+
+			currentEntry = currentEntry[currentPart];
+
+			if(!currentEntry)
+			{
+				return defaultHandler();
+			}
+
+			if (!currentQueueItem || (currentEntry._controller_ && currentEntry._controller_ !==  currentQueueItem.controller))
+			{
+				ctrl = currentEntry._controller_;
+				currentQueueItem = {
+					controller: ctrl,
+					args:[]
+				}
+				queue.push(currentQueueItem);
+			}
+
+
+				
+			if(currentEntry._handler_)
+				currentQueueItem.args.concat(_handler_.apply(ctrl,[rest, current]) || []);		
+
+			var next = rest.shift();
+			readPaths(currentEntry, rest, next);
+		
+		
+		play queue : 
+
+			var toload = [];
+			queue.forEach(function(q){
+				toLoad.push(deep(q.controller).load());	
+			});
+
+			deep(toload)
+			.done(function(){
+				queue.forEach(function(q){
+					deep(q.controller).refresh(q.args);
+				})
+			})
+			
+
+
+
