@@ -15,7 +15,7 @@ define(function (require)
 		/(\.json(\?.*)?)$/gi
 	];
 	deep.stores.json.get = function (id, options) {
-		//console.log("json.get : ", id);
+		//console.log("deep.stores.json.get : ", id);
 		var noCache = true;
 		if(id !== "")
 			for (var i = 0; i < this.extensions.length; ++i)
@@ -46,7 +46,7 @@ define(function (require)
 				data = JSON.parse(data);
 			if(!noCache && (options && options.cache !== false)  || (self.options && self.options.cache !== false))
 				deep.mediaCache.manage(data, id);
-
+		//	console.log("deep.stores.json.get results : ", data);
 			return data;
 		})
 		.fail(function(){
