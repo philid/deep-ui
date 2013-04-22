@@ -110,7 +110,7 @@ function(require, deep, VC, AC, Binder)
 				return this;
 			}
 	};
-	deep.utils.up(layer, deep.Handler.prototype);
+	deep.utils.up(layer, deep.Chain.prototype);
 
 	//__________________________________________________________________________ Additional API
 

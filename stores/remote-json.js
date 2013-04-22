@@ -62,7 +62,7 @@ define(function (require)
 		.store(this)
 		.done(function (success, handler) {
 			//console.log("json.get : "+id+" : result : ", success);
-			handler.range = deep.Handler.range;
+			handler.range = deep.Chain.range;
 			
 		});
 		if(!noCache && (options && options.cache !== false)  || (self.options && self.options.cache !== false))
@@ -101,7 +101,7 @@ define(function (require)
 		return deep(deep.promise(def))
 		.store(this)
 		.done(function (success, handler) {
-			handler.range = deep.Handler.range;
+			handler.range = deep.Chain.range;
 		});
 	};
 	deep.stores.json.post = function (object, id) {
@@ -138,7 +138,7 @@ define(function (require)
 		return deep(deep.promise(def))
 		.store(this)
 		.done(function (success, handler) {
-			handler.range = deep.Handler.range;
+			handler.range = deep.Chain.range;
 		});
 	};
 	deep.stores.json.del = function (id) {
@@ -172,7 +172,7 @@ define(function (require)
 		return deep(deep.promise(def))
 		.store(this)
 		.done(function (success, handler) {
-			handler.range = deep.Handler.range;
+			handler.range = deep.Chain.range;
 		});
 	};
 	deep.stores.json.patch = function (object, id) {
@@ -209,7 +209,7 @@ define(function (require)
 		return deep(deep.promise(def))
 		.store(this)
 		.done(function (argument, handler) {
-			handler.range = deep.Handler.range;
+			handler.range = deep.Chain.range;
 		});
 	};
 	deep.stores.json.bulk = function (arr, uri, options) {
@@ -244,7 +244,7 @@ define(function (require)
 		return deep(deep.promise(def))
 		.store(this)
 		.done(function (success, handler) {
-			handler.range = deep.Handler.range;
+			handler.range = deep.Chain.range;
 		});
 	};
 	deep.stores.json.rpc = function (method, params, id) {
@@ -284,7 +284,7 @@ define(function (require)
 		return deep(deep.promise(def))
 		.store(this)
 		.done(function (success, handler) {
-			handler.range = deep.Handler.range;
+			handler.range = deep.Chain.range;
 		});
 	};
 	deep.stores.json.range = function (arg1, arg2, query, options)
@@ -354,7 +354,7 @@ define(function (require)
 		})
 		.store(this)
 		.done(function (success, handler) {
-			handler.range = deep.Handler.range;
+			handler.range = deep.Chain.range;
 		});
 	};
 	deep.stores.json.create = function (name, uri, options)
