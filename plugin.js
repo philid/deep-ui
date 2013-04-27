@@ -59,13 +59,20 @@ function(require, deep, VC, AC, Binder)
 				return this;
 			},
 			deeplink: function(path, applyMap) {
+				var infos = path;
+				var params =null;
+				if(typeof path === 'object')
+				{
+					params = infos.parameters;
+					path = infos.path
+				}
 				var self = this;
 				var func = function(s, e) {
-					console.log("deeplink plugin : path=", path);
+					console.log("deeplink plugin : path=", infos);
 					if (applyMap) {
-						_APP.internalChange(path);
+						_APP.internalChange(path, params);
 					} else {
-						_APP.updateDeepLink(path);
+						_APP.updateDeepLink(path, params);
 					}
 
 					self.running = false;

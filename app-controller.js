@@ -22,9 +22,11 @@ define(["require", "./view-controller","./plugin"], function AppControllerDefine
 			othis=this;
 
 			$.address.externalChange(function(event) {
+				console.log(" $.address.externalChange : event : ", event);
 				othis.urlChanged(event);
 			});
-			$.address.internalChange(function (argument) {
+			$.address.internalChange(function (event) {
+			console.log(" $.address.internalChange : event : ", event);
 				// body...
 			});
 			//return deep(this).query("./views/*").bottom(ViewController);
@@ -66,14 +68,17 @@ define(["require", "./view-controller","./plugin"], function AppControllerDefine
 			if(ok)
 				$.address.path(finalPath.join("/"));
 		},
-		internalChange:function (path, query) 
+		internalChange:function (path, params) 
 		{
+
+			console.log("ADDRESS internalChange : path : ", path, " - params : ", params);
 			var a  = path.split("/");
 			if(a[0] == "")
 				a.shift();
 			var info = {
 				pathNames:a,
-				path:path
+				path:path,
+				parameters:params
 			}
 			this.urlChanged(info);
 		},
