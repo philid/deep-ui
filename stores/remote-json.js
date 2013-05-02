@@ -72,6 +72,8 @@ define(function (require)
 	deep.stores.json.put = function (object, options) {
 		options = options || {};
 		var id = object.id || options.id;
+		if(options.uri)
+			id = options.uri+id;
 		var self = this;
 		var def = deep.Deferred();
 		$.ajax({
@@ -106,7 +108,11 @@ define(function (require)
 			handler.range = deep.Chain.range;
 		});
 	};
-	deep.stores.json.post = function (object, id) {
+	deep.stores.json.post = function (object, options) {
+		options = options || {};
+		var id = object.id || options.id;
+		if(options.uri)
+			id = options.uri+id;
 		var self = this;
 		var def = deep.Deferred();
 		$.ajax({
@@ -177,7 +183,11 @@ define(function (require)
 			handler.range = deep.Chain.range;
 		});
 	};
-	deep.stores.json.patch = function (object, id) {
+	deep.stores.json.patch = function (object, options) {
+		options = options || {};
+		var id = object.id || options.id;
+		if(options.uri)
+			id = options.uri+id;
 		var self = this;
 		var def = deep.Deferred();
 		$.ajax({
@@ -371,21 +381,24 @@ define(function (require)
 				};
 			}),
 			post:deep.compose.around(function (old) {
-				return function (object, id, options) {
-					id = id || "";
-					return old.apply(this,[object, uri+id, options]);
+				return function (object, options) {
+					options = options || {};
+					options.uri = uri;
+					return old.apply(this,[object, options]);
 				};
 			}),
 			put:deep.compose.around(function (old) {
-				return function (object, id, options) {
-					id = id || "";
-					return old.apply(this,[object, uri+id, options]);
+				return function (object, options) {
+					options = options || {};
+					options.uri = uri;
+					return old.apply(this,[object,  options]);
 				};
 			}),
 			patch:deep.compose.around(function (old) {
-				return function (object, id, options) {
-					id = id || "";
-					return old.apply(this,[object, uri+id, options]);
+				return function (object, options) {
+					options = options || {};
+					options.uri = uri;
+					return old.apply(this,[object, options]);
 				};
 			}),
 			del:deep.compose.around(function (old) {
