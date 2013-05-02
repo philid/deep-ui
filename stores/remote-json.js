@@ -69,7 +69,9 @@ define(function (require)
 			deep.mediaCache.manage(d, id);
 		return d;
 	};
-	deep.stores.json.put = function (object, id) {
+	deep.stores.json.put = function (object, options) {
+		options = options || {};
+		var id = object.id || options.id;
 		var self = this;
 		var def = deep.Deferred();
 		$.ajax({
