@@ -107,11 +107,11 @@ define(function(require){
 			return Math.ceil(input);
 		},
 		division:function(input, by){
-			console.log("division : ", input, " - ", by, " res : ", input/by)
+			//console.log("division : ", input, " - ", by, " res : ", input/by)
 			return input/by;
 		},
 		multiply:function(input, by){
-			console.log("multiply : ", input, " - ", by, " res : ", input*by)
+			//console.log("multiply : ", input, " - ", by, " res : ", input*by)
 			return input*by;
 		},
 		minus:function(input, minus){
