@@ -6,7 +6,7 @@ routes :
 			campaign:{
 				_controller_:"app::/views/campaign",
 				_id_:{
-					_output_:{
+					_output_:function(){
 						return this.campaignId;
 					},
 					_handler_:function(rest, current)
@@ -87,6 +87,28 @@ routes :
 				})
 			})
 			
+
+
+deep.ui
+.render("swig::...", "user::*")
+.done(function(rendered){
+	var view = deep.ui.appendTo("...")(rendered);
+	$(view)
+	.find("button")
+	.click(function(e){
+		deep.ui.fromDataPath(view, "user::schema");
+		.store("user")
+		.post()
+		.done(function(result){
+
+		})
+		.fail(function(error){
+
+		});
+	});
+});
+
+
 
 
 

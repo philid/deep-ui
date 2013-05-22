@@ -7,7 +7,7 @@ define(function (require)
 	var deep = require("deep/deep");
 
 	//__________________________________________________
-	deep.stores.html = new deep.store.DeepStore();
+	deep.stores.html = new deep.store.Store();
 	var writeJQueryDefaultHeaders = function (req) {};
 	deep.stores.html.extensions = [
 		/(\.(html|htm|xhtm|xhtml)(\?.*)?)$/gi
@@ -41,7 +41,7 @@ define(function (require)
 		return d;
 	};
 	//__________________________________________________
-	deep.stores.swig = new deep.store.DeepStore();
+	deep.stores.swig = new deep.store.Store();
 	deep.stores.swig.extensions = [
 		/(\.(swig)(\?.*)?)$/gi
 	];

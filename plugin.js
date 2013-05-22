@@ -9,55 +9,6 @@ function(require, deep, VC, AC, Binder)
 	//_____________________________________________________________ Custom Chain Handler
 
 	var layer = {
-			post: function(uri, options) {
-				options = options || {};
-				var self = this;
-
-				function func() {
-					return function() {
-						self._entries.forEach(function(item) {
-							deep.when(deep.request.post(item.value, uri, options)).then(function(result) {
-								self.running = false;
-								deep.chain.nextQueueItem.apply(self, [result, null]);
-							},
-
-							function(error) {
-								console.error("error : deep.post : ", error);
-								if (options.continueIfErrors) {
-									self.running = false;
-									deep.chain.nextQueueItem.apply(self, [null, error]);
-								} else self.reject(error);
-							});
-						});
-					};
-				}
-				deep.chain.addInQueue.apply(this, [func()]);
-				return this;
-			},
-			put: function(uri, options) {
-				var self = this;
-
-				function func() {
-					return function() {
-						self._entries.forEach(function(item) {
-							deep.when(DeepRequest.put(item.value, uri, options)).then(function(result) {
-								self.running = false;
-								deep.chain.nextQueueItem.apply(self, [result, null]);
-							},
-
-							function(error) {
-								console.error("error : deep.put : ", error);
-								if (options.continueIfErrors) {
-									self.running = false;
-									deep.chain.nextQueueItem.apply(self, [null, error]);
-								} else self.reject(error);
-							});
-						});
-					};
-				}
-				deep.chain.addInQueue.apply(this, [func()]);
-				return this;
-			},
 			deeplink: function(path, applyMap) {
 				var infos = path;
 				var params =null;
@@ -77,41 +28,6 @@ function(require, deep, VC, AC, Binder)
 
 					self.running = false;
 					deep.chain.nextQueueItem.apply(self, [true, null]);
-				};
-				deep.chain.addInQueue.apply(this, [func]);
-				return this;
-			},
-			databind: function(parentSelector, options) {
-				var self = this;
-				var func = function(s, e) {
-					//var binder = new Binder(parentSelector, self.entries[0], schema)
-					self.running = false;
-					deep.chain.nextQueueItem.apply(self, [true, null]);
-				};
-				deep.chain.addInQueue.apply(this, [func]);
-				return this;
-			},
-			render: function(renderable) {
-				var self = this;
-				var func = function(s, e) {
-					var alls = [];
-					if (renderable) {
-						self._entries.forEach(function(entry) {
-							alls.push(deep.applyTreatment.apply(renderable, [entry.value]));
-						});
-					} else {
-						self._entries.forEach(function(entry) {
-							if (typeof entry.value.refresh === 'function')
-								alls.push(entry.value.refresh());
-							else
-								alls.push(JSON.stringify(entry.value));
-						});
-					}
-					deep.all(alls)
-						.done(function(results) {
-						self.running = false;
-						deep.chain.nextQueueItem.apply(self, [results, null]);
-					});
 				};
 				deep.chain.addInQueue.apply(this, [func]);
 				return this;
@@ -158,16 +74,20 @@ function(require, deep, VC, AC, Binder)
 		},
 		htmlOf: function(selector) {
 			return function(rendered, nodes) {
-				var newNodes = $(rendered);
 				$(selector).empty();
-				return newNodes.appendTo(selector);
+				return $(rendered).appendTo(selector);
 			};
 		},
 		ViewController: VC,
 		AppController: AC,
 		Binder: Binder,
-		render: function(renderable, context) {
-			return deep.applyTreatment.apply(renderable, [context || {}]);
+		render: function( how, what) {
+			return deep(deep.getAll([how, what]))
+			.done(function  (results) {
+				how = results.shift();
+				what = results.shift();
+				return how(what);
+			});
 		}
 	};
 
