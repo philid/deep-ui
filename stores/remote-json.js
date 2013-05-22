@@ -360,8 +360,8 @@ define(function (require)
 		});
 
 		return deep(deep.promise(def))
-		.done(function (rangeObject, handler) {
-			handler._entries = deep(rangeObject.results).nodes();
+		.done(function (rangeObject) {
+			this._entries = deep(rangeObject.results).nodes();
 			return rangeObject;
 		})
 		.store(this)
