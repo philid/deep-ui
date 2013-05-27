@@ -12,11 +12,14 @@ define(function(require){
 		//,"list-item-controller":true
 	};
 	var deep = require("deep/deep");
+
 	require("deep-ui/plugin");
-	var composer = require("deep/deep-compose");
-	var utils = require("deep/utils");
-	require("deep-ui/swig-init");
-		require("deep/deep-roles")(deep);
+	require("deep-ui/swig-init")();
+	require("deep/deep-roles")(deep);
+
+
+
+
 	deep(deep.roles).up({
 		"user":{
 			name:"user",
@@ -27,6 +30,10 @@ define(function(require){
 		}
 	})
 	.flatten();
+
+
+	var editor = require("deep-ui/html-binder");
+
 	var init = function()
 	{	
 		console.log("app intialised");

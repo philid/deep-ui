@@ -106,6 +106,19 @@ function(require, deep, VC, AC, Binder)
 		}
 	};
 
+	deep.ui.toDataPath = function (object, selector, schema) {
+		var binder = new Binder();
+		binder.init(selector, object, schema);
+		return deep(binder);
+	}
+
+	deep.ui.fromDataPath = function (selector, schema) {
+		var binder = new Binder();
+		binder.init(selector, null, schema);
+		return deep(binder.toDatas());
+	}
+
+
 	//___________________________________ STORES
 
 	deep.mediaCache = {

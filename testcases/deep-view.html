@@ -103,6 +103,26 @@ console.log("___________________");
 //_______________________________________________
 
 
+
+deep({names:"jhon", zip:1346})
+.val("swig::templates/simple.html")
+.done(function(s){
+    console.log("res render : ",s);
+    var node = $(s).appendTo("#content-container");
+    node.find('#my-button')
+    .click(function(e){
+        console.log("click");
+        deep.ui.fromEditableHTML("#json-container")
+        .log();
+    })
+    
+    deep.ui.toEditableHTML({ title:"hello", test:[1] }, "#json-container")
+    .done(function(s){
+        return deep.ui.fromEditableHTML("#json-container")
+    })
+    .log();
+})
+
 })();
 
 

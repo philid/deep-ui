@@ -9,6 +9,7 @@ define(function(require){
 	var deepCopy = utils.deepCopy;
 	console.log("swig init");
 	var filtersObject = {
+
 		mongoIDtoStringID:function(input){
 			//return "test";
 			return input;
@@ -98,6 +99,7 @@ define(function(require){
 			return input.substring(1);
 		},
 		json:function(input){
+			console.log("swig json : ", input);
 			return JSON.stringify(input, null, ' ')
 		},
 		floor:function(input){
