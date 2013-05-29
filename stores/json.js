@@ -1,16 +1,23 @@
 if(typeof define !== 'function')
 	var define = require('amdefine')(module);
 
-define(function (require)
+define(["require","deep-ui/stores/ajax"],function (require)
 {
 
 	var deep = require("deep/deep");
-	var writeJQueryDefaultHeaders = function (req) {};
-
 	//___________________________ JSON
-
 	deep.stores.json = new deep.store.Store();
+	deep.utils.bottom(deep.stores.ajax, deep.stores.json);
+	deep.stores.json.name = "json";
+	return deep.stores.json;
+	/*
 
+	deep.stores.json.writeJQueryDefaultHeaders = function (req) {
+		req.setRequestHeader("Accept", "application/json; charset=utf-8"); 
+		req.setRequestHeader("Content-type", "application/json; charset=utf-8"); 
+	};
+
+	deep.stores.json.dataType = "json";
 	deep.stores.json.extensions = [
 		/(\.json(\?.*)?)$/gi
 	];
@@ -33,13 +40,11 @@ define(function (require)
 		var self = this;
 		var d = deep($.ajax({
 			beforeSend :function(req) {
-				writeJQueryDefaultHeaders(req);
-				req.setRequestHeader("Accept", "application/json; charset=utf-8");
+				self.writeJQueryDefaultHeaders(req);
 			},
 			contentType: "application/json; charset=utf-8",
 			url:id,
-			method:"GET",
-			datatype:"json"
+			method:"GET"
 		})
 		.done(function(data, msg, jqXHR){
 			if(typeof data === 'string')
@@ -78,13 +83,11 @@ define(function (require)
 		var def = deep.Deferred();
 		$.ajax({
 			beforeSend :function(req) {
-				writeJQueryDefaultHeaders(req);
-				req.setRequestHeader("Accept", "application/json; charset=utf-8;");
+				self.writeJQueryDefaultHeaders(req);
 			},
 			type:"PUT",
 			url:id,
-			dataType:"application/json; charset=utf-8;",
-			contentType:"application/json; charset=utf-8;",
+			dataType:self.dataType,
 			data:JSON.stringify(object)
 		})
 		.done(function (success) {
@@ -109,29 +112,32 @@ define(function (require)
 		});
 	};
 	deep.stores.json.post = function (object, options) {
+		//console.log("deep.store.ajax : post : ", object, options);
 		options = options || {};
 		var id = object.id || options.id;
 		if(options.uri)
-			id = options.uri+id;
+			id = options.uri+((id)?id:"");
 		var self = this;
 		var def = deep.Deferred();
+		//console.log("post on : ", id);
 		$.ajax({
 			beforeSend :function(req) {
-				writeJQueryDefaultHeaders(req);
-				req.setRequestHeader("Accept", "application/json; charset=utf-8;");
+				self.writeJQueryDefaultHeaders(req);
 			},
 			type:"POST",
 			url:id,
-			dataType:"application/json; charset=utf-8;",
-			contentType:"application/json; charset=utf-8;",
-			data:JSON.stringify(object)
+			//processData:false,
+			//dataType:self.dataType,
+			data:( typeof object === 'string')?object:JSON.stringify(object)
 		})
 		.done(function (success) {
+			//console.log("deep.store.ajax.success : ", success);
 			def.resolve(success);
 		})
 		.fail(function  (jqXHR, textStatus, errorThrown) {
+			//console.log("deep.store.ajax.fail : ", textStatus);
 			var test = $.parseJSON(jqXHR.responseText);
-			if(jqXHR.status < 300)
+			if(jqXHR.status < 300 && textStatus !== 'error')
 			{
 				//console.log("DeepRequest.post : error but status 2xx : ", test, " - status provided : "+jqXHR.status);
 				if(typeof test === 'string')
@@ -139,9 +145,7 @@ define(function (require)
 				def.resolve(test);
 			}
 			else
-			{
 				def.reject(new Error("deep.store.json.post failed : "+id+" - details : "+JSON.stringify(arguments)));
-			}
 		});
 		return deep(deep.promise(def))
 		.store(this)
@@ -154,8 +158,7 @@ define(function (require)
 		var def = deep.Deferred();
 		$.ajax({
 			beforeSend :function(req) {
-				writeJQueryDefaultHeaders(req);
-				req.setRequestHeader("Accept", "application/json; charset=utf-8;");
+				self.writeJQueryDefaultHeaders(req);
 			},
 			type:"DELETE",
 			url:id
@@ -192,13 +195,11 @@ define(function (require)
 		var def = deep.Deferred();
 		$.ajax({
 			beforeSend :function(req) {
-				writeJQueryDefaultHeaders(req);
-				req.setRequestHeader("Accept", "application/json; charset=utf-8;");
+				self.writeJQueryDefaultHeaders(req);
 			},
 			type:"PATCH",
 			url:id,
-			dataType:"application/json; charset=utf-8;",
-			contentType:"application/json; charset=utf-8;",
+			dataType:self.dataType,
 			data:JSON.stringify(object)
 		})
 		.done(function (success) {
@@ -229,13 +230,11 @@ define(function (require)
 		var def = deep.Deferred();
 		$.ajax({
 			beforeSend :function(req) {
-				writeJQueryDefaultHeaders(req);
-				req.setRequestHeader("Accept", "application/json; charset=utf-8;");
+				self.writeJQueryDefaultHeaders(req);
 			},
 			type:"POST",
 			url:uri,
-			dataType:"message/json; charset=utf-8;",
-			contentType:"message/json; charset=utf-8;",
+			dataType:self.dataType,
 			data:JSON.stringify(arr)
 		})
 		.done(function (success) {
@@ -265,13 +264,12 @@ define(function (require)
 		var def = deep.Deferred();
 		$.ajax({
 			beforeSend :function(req) {
-				writeJQueryDefaultHeaders(req);
-				req.setRequestHeader("Accept", "application/json; charset=utf-8;");
+				self.writeJQueryDefaultHeaders(req);
 			},
 			type:"POST",
 			url:id,
 			//dataType:"application/json-rpc; charset=utf-8;",
-			contentType:"application/json-rpc; charset=utf-8;",
+			//dataType:self.dataType,
 			data:JSON.stringify({
 				id:callId,
 				method:method,
@@ -342,13 +340,12 @@ define(function (require)
 		}
 		$.ajax({
 			beforeSend :function(req) {
-				req.setRequestHeader("Accept", "application/json; charset=utf-8");
+				self.writeJQueryDefaultHeaders(req);
 				req.setRequestHeader("range", "items=" +start+"-"+end);
 			},
 			type:"GET",
 			url:query,
-			dataType:"application/json",
-			contentType:"application/json; charset=utf-8"
+			dataType:self.dataType,
 
 		}).then(function(data, text, jqXHR) {
 			return def.resolve(success(jqXHR, data));
@@ -431,6 +428,8 @@ define(function (require)
 		store.name = name;
 		return store;
 	};
+
 	return deep.stores.json;
+	*/
 
 });

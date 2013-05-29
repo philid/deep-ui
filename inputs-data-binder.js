@@ -282,7 +282,7 @@ define( function(require){
 						if(  $(field.input).hasClass("html-text") )
 						{
 							val = $(field.input).data('liveEdit').getXHTMLBody();
-							console.log("HTML-TEXT databinded : ", val);
+							//console.log("HTML-TEXT databinded : ", val);
 						} else
 							val = $(field.input).val();
 						break;
@@ -292,7 +292,7 @@ define( function(require){
 				if(val == "null" || val == "undefined" || val == undefined)
 					val = null;
 
-				console.log("INputsDataBinder.toDatas() : analyse field : ", field )
+				//console.log("INputsDataBinder.toDatas() : analyse field : ", field )
 				//console.log("INputsDataBinder.toDatas() : field has schema: ", this.pathMap[f].schema )
 
 				if(this.pathMap[f].schema)

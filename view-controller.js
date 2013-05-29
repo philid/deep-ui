@@ -48,33 +48,6 @@ define(function (require)
 			return  deep(this).query("./externals").deepLoad(this);
 			//.log("vc : load result ").log();
 		}),
-		/*render:deep.compose.createIfNecessary().after(function () 
-		{
-			if(!this.rendered)
-				this.rendered = {};
-			//console.log("will render "+this.name+" - context : ", ctx)
-			if(!this.templates || !this.templates.self)
-				this.rendered.self = "";
-			else
-				this.rendered.self = this.templates.self(this);
-		}),
-		placeInDOM:deep.compose.createIfNecessary().after(function () 
-		{
-			if((this.domSelectors.parent || this.domSelectors.self) && this.rendered.self)
-				if(this.domSelectors.self && $(this.domSelectors.self).length > 0)
-					$(this.domSelectors.self).replaceWith(this.rendered.self);
-				else
-				{
-					$(this.domSelectors.parent).empty();
-					$(this.rendered.self).appendTo(this.domSelectors.parent);
-				}
-		}),
-		isInDOM:deep.compose.createIfNecessary().after(function () 
-		{
-			if(this.domSelectors.self)
-				return ($(this.domSelectors.self).length() > 0);
-			return null;
-		}),*/
 		setBehaviour:function () {
 			//console.log("default setbehaviour")
 		},

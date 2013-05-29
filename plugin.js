@@ -3,7 +3,7 @@ if (typeof define !== 'function') {
 	var swig = require("swig");
 }
 
-define(["require", "deep/deep", "./view-controller", "./app-controller", "./inputs-data-binder", "./stores/remote-json", , "./stores/html"],
+define(["require", "deep/deep", "./view-controller", "./app-controller", "./inputs-data-binder", "./stores/json", "./stores/ajax", "./stores/xml", "./stores/html"],
 function(require, deep, VC, AC, Binder)
 {
 	//_____________________________________________________________ Custom Chain Handler
@@ -150,21 +150,26 @@ function(require, deep, VC, AC, Binder)
 	//__________________________________________________
 
 	deep.stores["dom.appendTo"] = {
+		name:"dom.appendTo",
 		get:function (selector, options) {
+			//console.log("DEEP.STORES.dom.appendTO : ", selector)
 			return deep.ui.appendTo(selector);
 		}
 	};
 	deep.stores["dom.prependTo"] = {
+		name:"dom.prependTo",
 		get:function (selector, options) {
 			return deep.ui.prependTo(selector);
 		}
 	};
 	deep.stores["dom.htmlOf"] = {
+		name:"dom.htmlOf",
 		get:function (selector, options) {
 			return deep.ui.htmlOf(selector);
 		}
 	};
 	deep.stores["dom.replace"] = {
+		name:"dom.replace",
 		get:function (selector, options) {
 			return deep.ui.replace(selector);
 		}
