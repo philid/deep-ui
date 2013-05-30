@@ -431,7 +431,7 @@ define(["require","deep/deep", "deep/deep-stores"],function (require)
 	deep.stores.ajax.extends = function (st, baseOptions)
 	{
 		var self = this;
-		console.log("deep.stores."+self.name+".extends : ",baseOptions);
+		//console.log("deep.stores."+self.name+".extends : ",baseOptions);
 
 		deep(st)
 		.bottom(this)
@@ -450,7 +450,7 @@ define(["require","deep/deep", "deep/deep-stores"],function (require)
 					options = options || {};
 					var uri = options.uri || baseOptions.uri;
 					options.uri = uri;
-					console.log("depp.stores.ajax.post : options :  ", options)
+					//console.log("depp.stores.ajax.post : options :  ", options)
 					return old.apply(this,[object, options]);
 				};
 			}),
