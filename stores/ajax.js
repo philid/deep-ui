@@ -154,13 +154,13 @@ define(["require","deep/deep", "deep/deep-stores"],function (require)
 		if(options.uri)
 			id = options.uri+((id)?id:"");
 		var self = this;
-		console.log("deep.store."+self.name+" : post : ", object, options, id);
+		//console.log("deep.store."+self.name+" : post : ", object, options, id);
 		var def = deep.Deferred();
 		//console.log("post on : ", id);
 		var body = self.bodyParser(object);
 		if(body instanceof Error)
 			return deep(error);
-		console.log("will post : ", body)
+		//console.log("will post : ", body)
 		$.ajax({
 			beforeSend :function(req) {
 				self.writeJQueryDefaultHeaders(req);
