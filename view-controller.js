@@ -24,9 +24,6 @@ if(typeof define !== 'function')
 define(function (require)
 {
 	var deep = require("deep/deep");
-
-
-
 	var ViewController = 
 	{
 		renderables:{
@@ -41,13 +38,17 @@ define(function (require)
 		load:deep.compose.createIfNecessary().after(function(arg) 
 		{
 			//console.log("ViewController.load : ", arg)
+			var self = this;
 			if(this._externals)
 				this.externals = deep.utils.copy(this._externals);
 			else if(this.externals)
 				this._externals = deep.utils.copy(this.externals);
-			return  deep(this).query("./externals").deepLoad(this);
+			return  deep(this).query("./externals").deepLoad(this).done(function(){
+				return self;
+			});
 			//.log("vc : load result ").log();
 		}),
+
 		setBehaviour:function () {
 			//console.log("default setbehaviour")
 		},
@@ -58,8 +59,6 @@ define(function (require)
 		{
 			var controller = this;
 			var args = Array.prototype.slice.call(arguments);
-
-
 			var loadRenderable = function () {
 				if(!this.how || this.condition === false)
 					return false;
@@ -145,8 +144,8 @@ define(function (require)
 
 			return deep(this)
 			.position("controller")
-			.run("willRefresh")
 			.run("beforeRefresh")
+			//.load()
 			.query("./renderables/["+args.join(",")+"]")
 			.run(loadRenderable)
 			.done(applyRenderables)
@@ -170,6 +169,9 @@ define(function (require)
 					this.setBehaviour(values);
 				if(this.hasRefresh && args.length == 0)
 					this.hasRefresh(values);
+			})
+			.done(function () {
+				return controller;
 			});
 		}),
 		show:function () {
@@ -181,6 +183,9 @@ define(function (require)
 			.run(function () {
 				if(this.nodes)
 					this.nodes.show();
+			})
+			.done(function () {
+				return controller;
 			});
 		},
 		hide:function () {
@@ -192,6 +197,8 @@ define(function (require)
 			.run(function () {
 				if(this.nodes)
 					this.nodes.hide();
+			}).done(function () {
+				return controller;
 			});
 		}
 	};
