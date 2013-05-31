@@ -432,10 +432,14 @@ define(["require","deep/deep", "deep/deep-stores"],function (require)
 	{
 		var self = this;
 		//console.log("deep.stores."+self.name+".extends : ",baseOptions);
-		var store = deep.utils.bottom(st, {
+
+		deep(st)
+		.bottom(this)
+		.up({
 			options:baseOptions,
 			get:deep.compose.createIfNecessary().around(function (old) {
 				return function (id, options) {
+					options = options || {};
 					if(id == "?" || !id)
 						id = "";
 					var uri = options.uri || baseOptions.uri;
@@ -447,7 +451,7 @@ define(["require","deep/deep", "deep/deep-stores"],function (require)
 					options = options || {};
 					var uri = options.uri || baseOptions.uri;
 					options.uri = uri;
-					console.log("depp.stores.ajax.post : options :  ", options)
+					//console.log("depp.stores.ajax.post : options :  ", options)
 					return old.apply(this,[object, options]);
 				};
 			}),
@@ -469,24 +473,28 @@ define(["require","deep/deep", "deep/deep-stores"],function (require)
 			}),
 			del:deep.compose.createIfNecessary().around(function (old) {
 				return function (id, options) {
+					options = options || {};
 					var uri = options.uri || baseOptions.uri;
 					return old.apply(this,[uri+id, options]);
 				};
 			}),
 			rpc:deep.compose.createIfNecessary().around(function (old) {
 				return function (method, params, id, options) {
+					options = options || {};
 					var uri = options.uri || baseOptions.uri;
 					return old.apply(this,[method, params, uri+id, options]);
 				};
 			}),
 			bulk:deep.compose.createIfNecessary().around(function (old) {
 				return function (arr, options) {
+					options = options || {};
 					var uri = options.uri || baseOptions.uri;
 					return old.apply(this,[arr, uri+id, options]);
 				};
 			}),
 			range:deep.compose.createIfNecessary().around(function (old) {
 				return function (start, end, query, options) {
+					options = options || {};
 					var uri = options.uri || baseOptions.uri;
 					query = query || "";
 					return old.apply(this,[start, end, uri+query, options]);
@@ -494,8 +502,7 @@ define(["require","deep/deep", "deep/deep-stores"],function (require)
 			}),
 			create:deep.collider.remove()
 		});
-		
-		return store;
+		return st;
 	};
 	return deep.stores.ajax;
 
