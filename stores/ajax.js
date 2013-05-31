@@ -439,6 +439,7 @@ define(["require","deep/deep", "deep/deep-stores"],function (require)
 			options:baseOptions,
 			get:deep.compose.createIfNecessary().around(function (old) {
 				return function (id, options) {
+					options = options || {};
 					if(id == "?" || !id)
 						id = "";
 					var uri = options.uri || baseOptions.uri;
@@ -472,24 +473,28 @@ define(["require","deep/deep", "deep/deep-stores"],function (require)
 			}),
 			del:deep.compose.createIfNecessary().around(function (old) {
 				return function (id, options) {
+					options = options || {};
 					var uri = options.uri || baseOptions.uri;
 					return old.apply(this,[uri+id, options]);
 				};
 			}),
 			rpc:deep.compose.createIfNecessary().around(function (old) {
 				return function (method, params, id, options) {
+					options = options || {};
 					var uri = options.uri || baseOptions.uri;
 					return old.apply(this,[method, params, uri+id, options]);
 				};
 			}),
 			bulk:deep.compose.createIfNecessary().around(function (old) {
 				return function (arr, options) {
+					options = options || {};
 					var uri = options.uri || baseOptions.uri;
 					return old.apply(this,[arr, uri+id, options]);
 				};
 			}),
 			range:deep.compose.createIfNecessary().around(function (old) {
 				return function (start, end, query, options) {
+					options = options || {};
 					var uri = options.uri || baseOptions.uri;
 					query = query || "";
 					return old.apply(this,[start, end, uri+query, options]);
