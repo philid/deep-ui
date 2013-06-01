@@ -32,7 +32,6 @@ define(function (require)
 		parentController:null,
 		//domSelectors:null,
 		externals:null,
-		reloadables:null,
 		//templates:null,
 		//translations:null,
 		load:deep.compose.createIfNecessary().after(function(arg) 
