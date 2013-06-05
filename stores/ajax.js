@@ -321,6 +321,7 @@ define(["require","deep/deep", "deep/deep-stores"],function (require)
 				self.writeJQueryDefaultHeaders(req);
 				if(options && options.headers)
 					self.writeCustomHeaders(req, options.headers);
+				req.setRequestHeader("Content-Type", "application/json-rpc; charset=utf-8");
 			},
 			type:"POST",
 			url:id,
