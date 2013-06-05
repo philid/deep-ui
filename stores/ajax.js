@@ -276,6 +276,7 @@ define(["require","deep/deep", "deep/deep-stores"],function (require)
 	};
 	deep.stores.ajax.bulk = function (arr, uri, options) {
 		var self = this;
+		options = options || {};
 		var def = deep.Deferred();
 		$.ajax({
 			beforeSend :function(req) {
@@ -310,8 +311,9 @@ define(["require","deep/deep", "deep/deep-stores"],function (require)
 			this.range = deep.Chain.range;
 		});
 	};
-	deep.stores.ajax.rpc = function (method, params, id) {
+	deep.stores.ajax.rpc = function (method, params, id, options) {
 		var self = this;
+		options = options || {};
 		var callId = "call"+new Date().valueOf();
 		var def = deep.Deferred();
 		$.ajax({
