@@ -92,6 +92,7 @@ define(["require", "./view-controller","./plugin"], function AppControllerDefine
 				ok = false;
 				var current = urlParams.pathNames.shift();
 				//search in the map if we have a entry
+				var roleOk = false;
 				if(currentMapEntry._roles && currentMapEntry._roles.length > 0)
 				{
 					var roles =  null;
@@ -99,18 +100,15 @@ define(["require", "./view-controller","./plugin"], function AppControllerDefine
 						roles = ["public"];
 					else
 						roles = _APP.user.roles || ["user"];
-					var roleOk = false;
 					roles.forEach(function (role) {
 						roleOk = roleOk || deep.utils.inArray(role, currentMapEntry._roles);
 					});
 					console.log(" check role in ap^p-vcontrollere map : ",roleOk);
 
 					if(!roleOk)
-						break;
+						return this.deeplinkingMap.defaultHandler(urlParams);
 				}
 
-				if(!roleOk)
-					return this.deeplinkingMap.defaultHandler(urlParams);
 				if(currentMapEntry[current])
 				{
 					currentMapEntry = currentMapEntry[current]
