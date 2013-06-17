@@ -88,6 +88,7 @@ define(["require", "./view-controller","./plugin"], function AppControllerDefine
 			var ok = true;
 
 			while(urlParams.pathNames.length > 0 && ok){
+				console.log("urlChanged : while on roles ")
 				ok = false;
 				var current = urlParams.pathNames.shift();
 				//search in the map if we have a entry
@@ -102,10 +103,14 @@ define(["require", "./view-controller","./plugin"], function AppControllerDefine
 					roles.forEach(function (role) {
 						roleOk = roleOk || deep.utils.inArray(role, currentMapEntry._roles);
 					});
+					console.log(" check role in ap^p-vcontrollere map : ",roleOk);
+
 					if(!roleOk)
 						break;
 				}
 
+				if(!roleOk)
+					return this.deeplinkingMap.defaultHandler(urlParams);
 				if(currentMapEntry[current])
 				{
 					currentMapEntry = currentMapEntry[current]
@@ -138,6 +143,7 @@ define(["require", "./view-controller","./plugin"], function AppControllerDefine
 					console.log("Dont find what i want in the url, redirect to default view");
 				}
 			}
+			console.log("after while on roles : ", ok, " - ", currentMapEntry)
 			//check if we have handler and execute it
 			if(ok && currentMapEntry._handler)
 			{
@@ -148,7 +154,7 @@ define(["require", "./view-controller","./plugin"], function AppControllerDefine
 			}
 			else
 			{
-				//console.log(" will open the default page");
+				console.log(" will open the default page");
 				var defHandler = currentMapEntry.defaultHandler || this.deeplinkingMap.defaultHandler;
 				if(defHandler)
 					defHandler.apply(this);
