@@ -1,6 +1,5 @@
 if(typeof define !== 'function'){
 	var define = require('amdefine')(module);
-	var swig = require("swig");
 }
 
 define(["require", "deep/deep", "deep-ui/plugin"], function(require, a, deep){
