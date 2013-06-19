@@ -148,27 +148,27 @@ function(require, deep, VC, AC, Binder)
 
 
 	//__________________________________________________
-
-	deep.stores["dom.appendTo"] = {
+	deep.protocoles.dom = {};
+	deep.protocoles.dom.appendTo = {
 		name:"dom.appendTo",
 		get:function (selector, options) {
-			//console.log("DEEP.STORES.dom.appendTO : ", selector)
+			//console.log("deep.protocoles.dom.appendTO : ", selector)
 			return deep.ui.appendTo(selector);
 		}
 	};
-	deep.stores["dom.prependTo"] = {
+	deep.protocoles.dom.prependTo = {
 		name:"dom.prependTo",
 		get:function (selector, options) {
 			return deep.ui.prependTo(selector);
 		}
 	};
-	deep.stores["dom.htmlOf"] = {
+	deep.protocoles.dom.htmlOf = {
 		name:"dom.htmlOf",
 		get:function (selector, options) {
 			return deep.ui.htmlOf(selector);
 		}
 	};
-	deep.stores["dom.replace"] = {
+	deep.protocoles.dom.replace = {
 		name:"dom.replace",
 		get:function (selector, options) {
 			return deep.ui.replace(selector);

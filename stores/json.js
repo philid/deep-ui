@@ -6,23 +6,29 @@ define(["require","deep-ui/stores/ajax"],function (require)
 
 	var deep = require("deep/deep");
 	//___________________________ JSON
-	deep.stores.json = new deep.store.Store();
-	deep.utils.bottom(deep.stores.ajax, deep.stores.json);
-	deep.stores.json.name = "json";
-	return deep.stores.json;
+	deep.protocoles.json = new deep.Store();
+	deep.utils.bottom(deep.protocoles.ajax, deep.protocoles.json);
+	deep.protocoles.json.name = "json";
+	deep.extensions.push({
+		store:deep.protocoles.json,
+		extensions:[
+			/(\.json(\?.*)?)$/gi
+		]
+	});
+	return deep.protocoles.json;
 	/*
 
-	deep.stores.json.writeJQueryDefaultHeaders = function (req) {
+	deep.protocoles.json.writeJQueryDefaultHeaders = function (req) {
 		req.setRequestHeader("Accept", "application/json; charset=utf-8"); 
 		req.setRequestHeader("Content-type", "application/json; charset=utf-8"); 
 	};
 
-	deep.stores.json.dataType = "json";
-	deep.stores.json.extensions = [
+	deep.protocoles.json.dataType = "json";
+	deep.protocoles.json.extensions = [
 		/(\.json(\?.*)?)$/gi
 	];
-	deep.stores.json.get = function (id, options) {
-		//console.log("deep.stores.json.get : ", id);
+	deep.protocoles.json.get = function (id, options) {
+		//console.log("deep.protocoles.json.get : ", id);
 		var noCache = true;
 		if(id !== "")
 			for (var i = 0; i < this.extensions.length; ++i)
@@ -51,7 +57,7 @@ define(["require","deep-ui/stores/ajax"],function (require)
 				data = JSON.parse(data);
 			if(!noCache && (options && options.cache !== false)  || (self.options && self.options.cache !== false))
 				deep.mediaCache.manage(data, id);
-		//	console.log("deep.stores.json.get results : ", data);
+		//	console.log("deep.protocoles.json.get results : ", data);
 			return data;
 		})
 		.fail(function(){
@@ -74,7 +80,7 @@ define(["require","deep-ui/stores/ajax"],function (require)
 			deep.mediaCache.manage(d, id);
 		return d;
 	};
-	deep.stores.json.put = function (object, options) {
+	deep.protocoles.json.put = function (object, options) {
 		options = options || {};
 		var id = object.id || options.id;
 		if(options.uri)
@@ -111,7 +117,7 @@ define(["require","deep-ui/stores/ajax"],function (require)
 			this.range = deep.Chain.range;
 		});
 	};
-	deep.stores.json.post = function (object, options) {
+	deep.protocoles.json.post = function (object, options) {
 		//console.log("deep.store.ajax : post : ", object, options);
 		options = options || {};
 		var id = object.id || options.id;
@@ -153,7 +159,7 @@ define(["require","deep-ui/stores/ajax"],function (require)
 			this.range = deep.Chain.range;
 		});
 	};
-	deep.stores.json.del = function (id) {
+	deep.protocoles.json.del = function (id) {
 		var self = this;
 		var def = deep.Deferred();
 		$.ajax({
@@ -186,7 +192,7 @@ define(["require","deep-ui/stores/ajax"],function (require)
 			this.range = deep.Chain.range;
 		});
 	};
-	deep.stores.json.patch = function (object, options) {
+	deep.protocoles.json.patch = function (object, options) {
 		options = options || {};
 		var id = object.id || options.id;
 		if(options.uri)
@@ -225,7 +231,7 @@ define(["require","deep-ui/stores/ajax"],function (require)
 			this.range = deep.Chain.range;
 		});
 	};
-	deep.stores.json.bulk = function (arr, uri, options) {
+	deep.protocoles.json.bulk = function (arr, uri, options) {
 		var self = this;
 		var def = deep.Deferred();
 		$.ajax({
@@ -258,7 +264,7 @@ define(["require","deep-ui/stores/ajax"],function (require)
 			this.range = deep.Chain.range;
 		});
 	};
-	deep.stores.json.rpc = function (method, params, id) {
+	deep.protocoles.json.rpc = function (method, params, id) {
 		var self = this;
 		var callId = "call"+new Date().valueOf();
 		var def = deep.Deferred();
@@ -297,7 +303,7 @@ define(["require","deep-ui/stores/ajax"],function (require)
 			this.range = deep.Chain.range;
 		});
 	};
-	deep.stores.json.range = function (arg1, arg2, query, options)
+	deep.protocoles.json.range = function (arg1, arg2, query, options)
 	{
 		var self = this;
 		var start = arg1, end = arg2;
@@ -333,7 +339,7 @@ define(["require","deep-ui/stores/ajax"],function (require)
 				}
 			}
 			else
-				console.log("ERROR deep.stores.json.range : range header missing !! ");
+				console.log("ERROR deep.protocoles.json.range : range header missing !! ");
 			rangeResult = deep.utils.createRangeObject(rangeResult.start, rangeResult.end, rangeResult.totalCount);
 			rangeResult.results = data;
 			return rangeResult;
@@ -366,9 +372,9 @@ define(["require","deep-ui/stores/ajax"],function (require)
 			this.range = deep.Chain.range;
 		});
 	};
-	deep.stores.json.create = function (name, uri, options)
+	deep.protocoles.json.create = function (name, uri, options)
 	{
-		var store = deep.utils.bottom(deep.stores.json, {
+		var store = deep.utils.bottom(deep.protocoles.json, {
 			options:options,
 			get:deep.compose.around(function (old) {
 				return function (id, options) {
@@ -424,12 +430,12 @@ define(["require","deep-ui/stores/ajax"],function (require)
 			}),
 			create:deep.collider.remove()
 		});
-		deep.stores[name] = store;
+		deep.protocoles[name] = store;
 		store.name = name;
 		return store;
 	};
 
-	return deep.stores.json;
+	return deep.protocoles.json;
 	*/
 
 });

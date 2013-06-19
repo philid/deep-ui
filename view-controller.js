@@ -56,6 +56,7 @@ define(function (require)
 		},
 		refresh:deep.compose.createIfNecessary().after(function () 
 		{
+			//console.log("ViewController.refresh")
 			var controller = this;
 			var args = Array.prototype.slice.call(arguments);
 			var loadRenderable = function () {
@@ -93,9 +94,10 @@ define(function (require)
 					objs.push(deep.get(where, { root:context._deep_entry || context }));
 				}
 				objs.unshift(renderable);
+				//console.log("load renderable : ", objs)
 				return deep.all(objs)
 				.fail(function(error){
-					console.log("Renderable rendering failed : ", error);
+					console.log("Renderables load failed : ", error);
 					if(typeof renderable.fail === 'function')
 						return renderable.fail.apply(context, [error]) || error;
 					return [{}, function(){ return ""; }, function(){} ];
@@ -104,6 +106,7 @@ define(function (require)
 
 			var applyRenderables = function (alls) // apply render and place in dom orderedly
 			{
+				//console.log("apply renderables: ", alls)
 				var res = [];
 				alls.forEach(function( results )
 				{
@@ -145,7 +148,11 @@ define(function (require)
 			.position("controller")
 			.run("beforeRefresh")
 			//.load()
+			//.log("________________________________ controller to load")
+			//.logValues()
 			.query("./renderables/["+args.join(",")+"]")
+			//.log("________________________________ renderables to load")
+			//.logValues()
 			.run(loadRenderable)
 			.done(applyRenderables)
 			.up({

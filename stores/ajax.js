@@ -1,28 +1,26 @@
 if(typeof define !== 'function')
 	var define = require('amdefine')(module);
 
-define(["require","deep/deep", "deep/deep-stores"],function (require)
+define(["require","deep/deep"],function (require)
 {
 
 	var deep = require("deep/deep");
 
 
-	deep.stores.ajax = new deep.store.Store();
+	deep.protocoles.ajax = new deep.Store();
 
 
 	//________________________________________________________________________ Customisation API
 
-	deep.stores.ajax.writeJQueryDefaultHeaders = function (req) {
+	deep.protocoles.ajax.writeJQueryDefaultHeaders = function (req) {
 		req.setRequestHeader("Accept", "application/json; charset=utf-8"); 
 		req.setRequestHeader("Content-Type", "application/json; charset=utf-8"); 
 	};
-	deep.stores.ajax.name = "ajax";
-	deep.stores.ajax.dataType = "json";
-	deep.stores.ajax.extensions = [
-		/(\.json(\?.*)?)$/gi
-	];
+	deep.protocoles.ajax.name = "ajax";
+	deep.protocoles.ajax.dataType = "json";
 
-	deep.stores.ajax.bodyParser = function(data){
+
+	deep.protocoles.ajax.bodyParser = function(data){
 		try{
 			if(typeof data !== 'string')
 				data = JSON.stringify(data);
@@ -33,7 +31,7 @@ define(["require","deep/deep", "deep/deep-stores"],function (require)
 		}
 		return data;
 	}
-	deep.stores.ajax.responseParser = function(data, msg, jqXHR){
+	deep.protocoles.ajax.responseParser = function(data, msg, jqXHR){
 		try{
 			if(typeof data === 'string')
 				data = JSON.parse(data);
@@ -45,14 +43,15 @@ define(["require","deep/deep", "deep/deep-stores"],function (require)
 		return data;
 	}
 	//________________________________________________________________________ END CUSOTMISATION
-	deep.stores.ajax.writeCustomHeaders = function (req, headers) {
+	deep.protocoles.ajax.writeCustomHeaders = function (req, headers) {
 		for(var i in headers)
 			req.setRequestHeader(i, headers[i]); 
 	};
-	deep.stores.ajax.get = function (id, options) {
-		//console.log("deep.stores.ajax.get : ", id);
+	deep.protocoles.ajax.get = function (id, options) {
+		//console.log("deep.protocoles.ajax.get : ", id);
 		var noCache = true;
 		if(id !== "")
+			if(this.extensions)
 			for (var i = 0; i < this.extensions.length; ++i)
 			{
 				var res = id.match(this.extensions[i]);
@@ -82,12 +81,12 @@ define(["require","deep/deep", "deep/deep-stores"],function (require)
 				return data;
 			if(!noCache && (options && options.cache !== false)  || (self.options && self.options.cache !== false))
 				deep.mediaCache.manage(data, id);
-		//	console.log("deep.stores.ajax.get results : ", data);
+		//	console.log("deep.protocoles.ajax.get results : ", data);
 			return data;
 		})
 		.fail(function(){
 			//console.log("deep.store.ajax.get error : ",id," - ", arguments);
-			return new Error("deep.stores."+self.name+" failed : "+id+" - \n\n"+JSON.stringify(arguments));
+			return new Error("deep.protocoles."+self.name+" failed : "+id+" - \n\n"+JSON.stringify(arguments));
 		}))
 		.done(function (datas) {
 			//console.log("json.get : result : ", datas);
@@ -105,7 +104,7 @@ define(["require","deep/deep", "deep/deep-stores"],function (require)
 			deep.mediaCache.manage(d, id);
 		return d;
 	};
-	deep.stores.ajax.put = function (object, options) {
+	deep.protocoles.ajax.put = function (object, options) {
 		options = options || {};
 		var id = object.id || options.id;
 		if(options.uri)
@@ -148,7 +147,7 @@ define(["require","deep/deep", "deep/deep-stores"],function (require)
 			this.range = deep.Chain.range;
 		});
 	};
-	deep.stores.ajax.post = function (object, options) {
+	deep.protocoles.ajax.post = function (object, options) {
 		options = options || {};
 		var id = object.id || options.id;
 		if(options.uri)
@@ -183,7 +182,7 @@ define(["require","deep/deep", "deep/deep-stores"],function (require)
 			if(jqXHR.status < 400 && textStatus !== 'error')
 			{
 				var test = self.responseParser(jqXHR.responseText, textStatus, jqXHR);
-				//console.log("deep.stores."+self.name+".post : error but status 2xx : ", test, " - status provided : "+jqXHR.status);
+				//console.log("deep.protocoles."+self.name+".post : error but status 2xx : ", test, " - status provided : "+jqXHR.status);
 				def.resolve(test);
 			}
 			else
@@ -195,7 +194,7 @@ define(["require","deep/deep", "deep/deep-stores"],function (require)
 			this.range = deep.Chain.range;
 		});
 	};
-	deep.stores.ajax.del = function (id) {
+	deep.protocoles.ajax.del = function (id) {
 		var self = this;
 		var def = deep.Deferred();
 		$.ajax({
@@ -216,7 +215,7 @@ define(["require","deep/deep", "deep/deep-stores"],function (require)
 			if(jqXHR.status < 400)
 			{
 				var test = self.responseParser(jqXHR.responseText, textStatus, jqXHR);
-				//console.log("deep.stores."+self.name+".del : error but status 2xx : ", test, " - status provided : "+jqXHR.status);
+				//console.log("deep.protocoles."+self.name+".del : error but status 2xx : ", test, " - status provided : "+jqXHR.status);
 				def.resolve(test);
 			}
 			else
@@ -230,7 +229,7 @@ define(["require","deep/deep", "deep/deep-stores"],function (require)
 			this.range = deep.Chain.range;
 		});
 	};
-	deep.stores.ajax.patch = function (object, options) {
+	deep.protocoles.ajax.patch = function (object, options) {
 		options = options || {};
 		var id = object.id || options.id;
 		if(options.uri)
@@ -261,7 +260,7 @@ define(["require","deep/deep", "deep/deep-stores"],function (require)
 			if(jqXHR.status < 400)
 			{
 				var test = self.responseParser(jqXHR.responseText, textStatus, jqXHR);
-				//console.log("deep.stores."+self.name+".del : error but status 2xx : ", test, " - status provided : "+jqXHR.status);
+				//console.log("deep.protocoles."+self.name+".del : error but status 2xx : ", test, " - status provided : "+jqXHR.status);
 				def.resolve(test);
 			}
 			else
@@ -274,7 +273,7 @@ define(["require","deep/deep", "deep/deep-stores"],function (require)
 			this.range = deep.Chain.range;
 		});
 	};
-	deep.stores.ajax.bulk = function (arr, uri, options) {
+	deep.protocoles.ajax.bulk = function (arr, uri, options) {
 		var self = this;
 		options = options || {};
 		var def = deep.Deferred();
@@ -299,7 +298,7 @@ define(["require","deep/deep", "deep/deep-stores"],function (require)
 			if(jqXHR.status < 400)
 			{
 				var test = self.responseParser(jqXHR.responseText, textStatus, jqXHR);
-				//console.log("deep.stores."+self.name+".del : error but status 2xx : ", test, " - status provided : "+jqXHR.status);
+				//console.log("deep.protocoles."+self.name+".del : error but status 2xx : ", test, " - status provided : "+jqXHR.status);
 				def.resolve(test);
 			}
 			else
@@ -311,7 +310,7 @@ define(["require","deep/deep", "deep/deep-stores"],function (require)
 			this.range = deep.Chain.range;
 		});
 	};
-	deep.stores.ajax.rpc = function (method, params, id, options) {
+	deep.protocoles.ajax.rpc = function (method, params, id, options) {
 		var self = this;
 		options = options || {};
 		var callId = "call"+new Date().valueOf();
@@ -343,7 +342,7 @@ define(["require","deep/deep", "deep/deep-stores"],function (require)
 			if(jqXHR.status < 400)
 			{
 				var test = self.responseParser(jqXHR.responseText, textStatus, jqXHR);
-				//console.log("deep.stores."+self.name+".del : error but status 2xx : ", test, " - status provided : "+jqXHR.status);
+				//console.log("deep.protocoles."+self.name+".del : error but status 2xx : ", test, " - status provided : "+jqXHR.status);
 				def.resolve(test);
 			}
 			else
@@ -355,7 +354,7 @@ define(["require","deep/deep", "deep/deep-stores"],function (require)
 			this.range = deep.Chain.range;
 		});
 	};
-	deep.stores.ajax.range = function (arg1, arg2, query, options)
+	deep.protocoles.ajax.range = function (arg1, arg2, query, options)
 	{
 		var self = this;
 		var start = arg1, end = arg2;
@@ -391,7 +390,7 @@ define(["require","deep/deep", "deep/deep-stores"],function (require)
 				}
 			}
 			else
-				console.log("ERROR deep.stores."+self.name+".range : range header missing !! ");
+				console.log("ERROR deep.protocoles."+self.name+".range : range header missing !! ");
 			rangeResult = deep.utils.createRangeObject(rangeResult.start, rangeResult.end, rangeResult.totalCount);
 			rangeResult.results = data;
 			return rangeResult;
@@ -413,7 +412,7 @@ define(["require","deep/deep", "deep/deep-stores"],function (require)
 			if(jqXHR.status == 200 || jqXHR.status == 206)
 			{
 				var test = self.responseParser(jqXHR.responseText, textStatus, jqXHR);
-				//console.log("deep.stores."+self.name+".del : error but status 2xx : ", test, " - status provided : "+jqXHR.status);
+				//console.log("deep.protocoles."+self.name+".del : error but status 2xx : ", test, " - status provided : "+jqXHR.status);
 				def.resolve(success(jqXHR, test));
 			}
 			else
@@ -431,10 +430,10 @@ define(["require","deep/deep", "deep/deep-stores"],function (require)
 		});
 	};
 
-	deep.stores.ajax.extends = function (st, baseOptions)
+	deep.protocoles.ajax.extends = function (st, baseOptions)
 	{
 		var self = this;
-		//console.log("deep.stores."+self.name+".extends : ",baseOptions);
+		//console.log("deep.protocoles."+self.name+".extends : ",baseOptions);
 
 		deep(st)
 		.bottom(this)
@@ -507,6 +506,6 @@ define(["require","deep/deep", "deep/deep-stores"],function (require)
 		});
 		return st;
 	};
-	return deep.stores.ajax;
+	return deep.protocoles.ajax;
 
 });

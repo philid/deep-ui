@@ -1,18 +1,21 @@
 if(typeof define !== 'function')
 	var define = require('amdefine')(module);
 
-define(function (require)
+define(["require", "deep-ui/stores/ajax"],function (require)
 {
 
 	var deep = require("deep/deep");
 
 	//__________________________________________________
-	deep.stores.html = new deep.store.Store();
+	deep.protocoles.html = new deep.Store();
 	var writeJQueryDefaultHeaders = function (req) {};
-	deep.stores.html.extensions = [
-		/(\.(html|htm|xhtm|xhtml)(\?.*)?)$/gi
-	];
-	deep.stores.html.get = function (id, options) {
+	deep.extensions.push({
+		extensions:[
+			/(\.(html|htm|xhtm|xhtml)(\?.*)?)$/gi
+		],
+		store:deep.protocoles.html
+	});
+	deep.protocoles.html.get = function (id, options) {
 		options = options || {};
 		if(options.cache !== false && deep.mediaCache.cache[id])
 			return deep(deep.mediaCache.cache[id]).store(this);
@@ -41,18 +44,23 @@ define(function (require)
 		return d;
 	};
 	//__________________________________________________
-	deep.stores.swig = new deep.store.Store();
-	deep.stores.swig.extensions = [
+	deep.protocoles.swig = new deep.Store();
+	deep.extensions.push({
+		store:deep.protocoles.swig,
+		extensions : [
 		/(\.(swig)(\?.*)?)$/gi
-	];
-	deep.stores.swig.get = function (id, options) {
+		]
+	});
+	deep.protocoles.swig.get = function (id, options) {
+		console.log("swig store : ", id, options)
 		options = options || {};
 		if(options.cache !== false && deep.mediaCache.cache["swig::"+id])
 			return deep(deep.mediaCache.cache["swig::"+id]).store(this);
 		var self = this;
-		var d = deep.stores.html.get(id, {cache:false})
+		var d = deep.protocoles.html.get(id, {cache:false})
 		.done(function (data) {
 			var resi = swig.compile(data, { filename:deep.utils.stripFirstSlash(id) });
+			//console.log("swig store : resi ", resi);
 			delete deep.mediaCache.cache["swig::"+id];
 			if((options && options.cache !== false)  || (self.options && self.options.cache !== false))
 				deep.mediaCache.manage(resi, "swig::"+id);
@@ -63,6 +71,6 @@ define(function (require)
 			deep.mediaCache.manage(d, "swig::"+id);
 		return d;
 	};
-	return deep.stores.html;
+	return deep.protocoles.html;
 
 });

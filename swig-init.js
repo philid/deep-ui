@@ -3,9 +3,8 @@ if(typeof define !== 'function'){
 	var define = require('amdefine')(module);
 	var swig = require("swig");
 }
-define(function(require){
-	var utils = require("deep/utils");
-	var JsonQuery = require("deep/deep-query");
+define(["require","deep/deep"],function(require){
+	var utils = deep.utils;
 	var deepCopy = utils.deepCopy;
 	console.log("swig init");
 	var filtersObject = {

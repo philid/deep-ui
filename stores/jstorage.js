@@ -1,27 +1,27 @@
 if(typeof define !== 'function')
 	var define = require('amdefine')(module);
 
-define(function (require)
+define(["require", "deep-ui/stores/ajax"],function (require)
 {
 
 	var deep = require("deep/deep");
 
 	//___________________________ JSON
 
-	deep.stores.lsarray = new deep.store.Store();
+	deep.protocoles.lsarray = new deep.Store();
 
-	deep.stores.lsarray.extensions = [];
-	deep.stores.lsarray.get = function (id, options) {
+	deep.protocoles.lsarray.extensions = [];
+	deep.protocoles.lsarray.get = function (id, options) {
 
 	};
 
 
 
 
-	deep.stores.lsobject = new deep.store.Store();
+	deep.protocoles.lsobject = new deep.Store();
 
-	deep.stores.lsobject.extensions = [];
-	deep.stores.lsobject.get = function (id, options) {
+	deep.protocoles.lsobject.extensions = [];
+	deep.protocoles.lsobject.get = function (id, options) {
 
 	};
 })
