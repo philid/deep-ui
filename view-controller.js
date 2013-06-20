@@ -206,7 +206,10 @@ define(function (require)
 			}).done(function () {
 				return controller;
 			});
-		}
+		},
+		me:function (argument) {
+            return this;
+        }
 	};
 
 
