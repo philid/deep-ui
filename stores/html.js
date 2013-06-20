@@ -52,7 +52,7 @@ define(["require", "deep-ui/stores/ajax"],function (require)
 		]
 	});
 	deep.protocoles.swig.get = function (id, options) {
-		console.log("swig store : ", id, options)
+		//console.log("swig store : ", id, options)
 		options = options || {};
 		if(options.cache !== false && deep.mediaCache.cache["swig::"+id])
 			return deep(deep.mediaCache.cache["swig::"+id]).store(this);

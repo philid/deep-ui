@@ -94,7 +94,7 @@ function(require, deep, VC, AC, Binder)
 	deep.linker = {
 		addToPath: function(section) {
 			if (section instanceof DeepHandler)
-				section = section._entries[0].value;
+				section = section._nodes[0].value;
 			console.log(" DEEP.LINKER Add TO PATH : ", section);
 			var old = $.address.path();
 			if (old[old.length - 1] != "/")

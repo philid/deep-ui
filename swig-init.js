@@ -98,7 +98,7 @@ define(["require","deep/deep"],function(require){
 			return input.substring(1);
 		},
 		json:function(input){
-			console.log("swig json : ", input);
+			//console.log("swig json : ", input);
 			return JSON.stringify(input, null, ' ')
 		},
 		floor:function(input){

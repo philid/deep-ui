@@ -91,9 +91,8 @@ define(["require","deep/deep"],function (require)
 		.done(function (datas) {
 			//console.log("json.get : result : ", datas);
 			var handler = this;
-			return deep(datas).nodes(function (nodes) {
-				handler._entries = nodes;
-			});
+			handler._nodes = [deep.Querier.createRootNode(datas, null, options)];
+			handler._queried = false;
 		})
 		.store(this)
 		.done(function (success) {
@@ -421,7 +420,7 @@ define(["require","deep/deep"],function (require)
 
 		return deep(deep.promise(def))
 		.done(function (rangeObject) {
-			this._entries = deep(rangeObject.results).nodes();
+			this._nodes = deep(rangeObject.results).nodes();
 			return rangeObject;
 		})
 		.store(this)

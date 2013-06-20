@@ -68,7 +68,7 @@ define(["require","deep-ui/stores/ajax"],function (require)
 			//console.log("json.get : result : ", datas);
 			var handler = this;
 			return deep(datas).nodes(function (nodes) {
-				handler._entries = nodes;
+				handler._nodes = nodes;
 			});
 		})
 		.store(this)
@@ -364,7 +364,7 @@ define(["require","deep-ui/stores/ajax"],function (require)
 
 		return deep(deep.promise(def))
 		.done(function (rangeObject) {
-			this._entries = deep(rangeObject.results).nodes();
+			this._nodes = deep(rangeObject.results).nodes();
 			return rangeObject;
 		})
 		.store(this)
