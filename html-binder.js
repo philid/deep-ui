@@ -2,11 +2,10 @@ if(typeof define !== 'function'){
 	var define = require('amdefine')(module);
 }
 
-define(["require", "deep/deep", "deep-ui/plugin"], function(require, a, deep){
+define(["require","deep-ui/plugin"], function(require){
 
-	//var deep = require("deep");
-
-
+	return function(deep)
+	{
 	function editInPlaceBlur(clicked, prop)
 	{
 		var self = this;
@@ -172,8 +171,11 @@ define(["require", "deep/deep", "deep-ui/plugin"], function(require, a, deep){
 	{
 		var output = {};
 		var stack =  [output];
-		$(selector + " *[property-type]").each(function()
+			console.log("fromEditable html : try: ", selector + " *[property-type]");
+
+		$(selector).find(" *[property-type]").each(function()
 		{
+			console.log("fromEditable html : each proprty : ", this);
 			var propType = $(this).attr("property-type");
 			var depth = parseInt($(this).attr("property-depth"));
 			var key = $(this).find(".property-key:first").text();
@@ -200,12 +202,13 @@ define(["require", "deep/deep", "deep-ui/plugin"], function(require, a, deep){
 			if(propType == 'array' || propType == 'object')
 				stack.push(value);
 		});
-		//console.log("created output : ", output);
+		console.log("created output : ", output);
 		//$(this.domSelectors.output).html(JSON.stringify(output,null , ' '));
 		return deep(output);
 	}
 	
 	return JsonEditorController;
+}
 })
 
 

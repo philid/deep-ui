@@ -34,7 +34,7 @@ define(function (require)
 		externals:null,
 		//templates:null,
 		//translations:null,
-		load:deep.compose.createIfNecessary().after(function(arg) 
+		load:function(arg) 
 		{
 			//console.log("ViewController.load : ", arg)
 			var self = this;
@@ -46,7 +46,7 @@ define(function (require)
 				return self;
 			});
 			//.log("vc : load result ").log();
-		}),
+		},
 
 		setBehaviour:function () {
 			//console.log("default setbehaviour")
@@ -56,7 +56,7 @@ define(function (require)
 		},
 		refresh:deep.compose.createIfNecessary().after(function () 
 		{
-			//console.log("ViewController.refresh")
+			//console.log("ViewController.refresh : ",arguments)
 			var controller = this;
 			var args = Array.prototype.slice.call(arguments);
 			var loadRenderable = function () {
