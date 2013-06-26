@@ -49,7 +49,7 @@
 	.query("/datas")
 	.load("json::./json/book.json")
 	.log("__________deep.load : /datas loaded ")
-	.valuesEqual([
+	.equal([
 	{ 
 		"category": "reference",
 		"author": "Nigel Rees",
@@ -68,7 +68,7 @@
 	.query("/datas2")
 	.load()
 	.log("__________deep.load : /datas2 loaded ")
-	.valuesEqual([
+	.equal([
 	{ 
 		"category": "reference",
 		"author": "Nigel Rees",
@@ -88,7 +88,7 @@
 	.load()
 	.log("__________deep.load : /obj loaded ")
 	.query("./datas3")
-	.valuesEqual([
+	.equal([
 	{ 
 		"category": "reference",
 		"author": "Nigel Rees",

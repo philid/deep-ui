@@ -175,6 +175,26 @@ function(require, deep, VC, AC, Binder)
 		}
 	};
 
+    deep.Chain.addHandle("refresh", function()
+	{
+		var args= arguments;
+		var self = this;
+		var func = function(s,e)
+		{
+			var alls = [];
+			deep.chain.each(self, function (v) {
+				if(typeof v.refresh === "function")
+					alls.push(v.refresh.apply(v,args));
+				else
+					alls.push(v);
+			})
+			return deep.all(alls);
+		}
+		func._isDone_ = true;
+		deep.chain.addInChain.apply(self,[func]);
+		return this;
+	});
+
 	require("./html-binder")(deep);
 	return deep;
 });

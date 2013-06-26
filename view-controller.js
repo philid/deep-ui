@@ -24,7 +24,7 @@ if(typeof define !== 'function')
 define(function (require)
 {
 	var deep = require("deep/deep");
-	var ViewController = 
+	var ViewController =
 	{
 		renderables:{
 
@@ -34,7 +34,7 @@ define(function (require)
 		externals:null,
 		//templates:null,
 		//translations:null,
-		load:function(arg) 
+		load:function(arg)
 		{
 			//console.log("ViewController.load : ", arg)
 			var self = this;
@@ -54,7 +54,7 @@ define(function (require)
 		beforeRefresh:function () {
 			//console.log("default setbehaviour")
 		},
-		refresh:deep.compose.createIfNecessary().after(function () 
+		refresh:deep.compose.createIfNecessary().after(function ()
 		{
 			//console.log("ViewController.refresh : ",arguments)
 			var controller = this;
@@ -142,8 +142,6 @@ define(function (require)
 				return res;
 			};
 
-
-
 			return deep(this)
 			.position("controller")
 			.run("beforeRefresh")
@@ -211,7 +209,5 @@ define(function (require)
             return this;
         }
 	};
-
-
 	return ViewController;
 });
