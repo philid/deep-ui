@@ -21,15 +21,13 @@ function(require, deep, VC, AC, Binder)
 				var func = function(s, e) {
 					console.log("deeplink plugin : path=", infos);
 					if (applyMap) {
-						_APP.internalChange(path, params);
+						smart.app().internalChange(path, params);
 					} else {
-						_APP.updateDeepLink(path, params);
+						smart.app().updateDeepLink(path, params);
 					}
-
-					self.running = false;
-					deep.chain.nextQueueItem.apply(self, [true, null]);
+					return true;
 				};
-				deep.chain.addInQueue.apply(this, [func]);
+				deep.chain.addInChain.apply(this, [func]);
 				return this;
 			}
 	};

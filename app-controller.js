@@ -37,14 +37,16 @@ define(["require", "./view-controller","./plugin"], function AppControllerDefine
 			.query("./externals")
 			.deepLoad();
 		},
-	
 		currentView:null,
-		updateDeepLink:function  (path) {
+		updateDeepLink:function  (path) 
+		{
 			if(path == $.address.path())
 				return;
 			console.log("App.updateDeepLink : ", path)
 			var parsed = path.split("/");
 			var currentMapEntry = this.deeplinkingMap;
+			if(!currentMapEntry)
+				return;
 			var ok = true;
 			var finalPath = [];
 			while(parsed.length > 0)
@@ -70,7 +72,6 @@ define(["require", "./view-controller","./plugin"], function AppControllerDefine
 		},
 		internalChange:function (path, params) 
 		{
-
 			console.log("ADDRESS internalChange : path : ", path, " - params : ", params);
 			var a  = path.split("/");
 			if(a[0] == "")
@@ -82,17 +83,20 @@ define(["require", "./view-controller","./plugin"], function AppControllerDefine
 			}
 			this.urlChanged(info);
 		},
-		urlChanged:function (urlParams) {
+		urlChanged:function (urlParams)
+		{
 			console.log("URL CHANGED params = ", urlParams);
 			var currentMapEntry = this.deeplinkingMap;
 			var ok = true;
-
-			while(urlParams.pathNames.length > 0 && ok){
+			while(urlParams.pathNames.length > 0 && ok)
+			{
 				console.log("urlChanged : while on roles ")
 				ok = false;
 				var current = urlParams.pathNames.shift();
 				//search in the map if we have a entry
 				var roleOk = false;
+				if(!currentMapEntry)
+					return;
 				if(currentMapEntry._roles && currentMapEntry._roles.length > 0)
 				{
 					var roles =  null;
