@@ -9,11 +9,12 @@ define(["require","deep-ui/stores/ajax"],function (require)
 	deep.protocoles.json = new deep.Store();
 	deep.utils.bottom(deep.protocoles.ajax, deep.protocoles.json);
 	deep.protocoles.json.name = "json";
+	deep.protocoles.json.extensions = [
+		/(\.json(\?.*)?)$/gi
+	];
 	deep.extensions.push({
 		store:deep.protocoles.json,
-		extensions:[
-			/(\.json(\?.*)?)$/gi
-		]
+		extensions:deep.protocoles.json.extensions
 	});
 	return deep.protocoles.json;
 	/*

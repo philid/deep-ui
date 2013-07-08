@@ -14,7 +14,9 @@ define(["require","deep/deep"],function (require)
 
 	deep.protocoles.ajax.writeJQueryDefaultHeaders = function (req) {
 		req.setRequestHeader("Accept", "application/json; charset=utf-8"); 
-		req.setRequestHeader("Content-Type", "application/json; charset=utf-8"); 
+		req.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+		for(var i in deep.globalHeaders)
+			req.setRequestHeader(i, deep.globalHeaders[i]);
 	};
 	deep.protocoles.ajax.name = "ajax";
 	deep.protocoles.ajax.dataType = "json";
@@ -48,7 +50,7 @@ define(["require","deep/deep"],function (require)
 			req.setRequestHeader(i, headers[i]); 
 	};
 	deep.protocoles.ajax.get = function (id, options) {
-		//console.log("deep.protocoles.ajax.get : ", id);
+		//console.log("deep.protocoles."+this.name+".get : ", id);
 		var noCache = true;
 		if(id !== "")
 			if(this.extensions)
@@ -58,6 +60,7 @@ define(["require","deep/deep"],function (require)
 				if(res && res.length > 0)
 				{
 					noCache = false;
+					//console.log("NO CACHE : ", id)
 					break;
 				}
 			}
@@ -418,7 +421,7 @@ define(["require","deep/deep"],function (require)
 				def.reject(new Error("deep.store."+self.name+".range failed : details : "+JSON.stringify(arguments)));
 		});
 
-		return deep(deep.promise(def))
+		return deep(def)
 		.done(function (rangeObject) {
 			this._nodes = deep(rangeObject.results).nodes();
 			return rangeObject;
@@ -433,12 +436,13 @@ define(["require","deep/deep"],function (require)
 	{
 		var self = this;
 		//console.log("deep.protocoles."+self.name+".extends : ",baseOptions);
-
+		if(baseOptions && baseOptions.protocole)
+			deep.protocoles[baseOptions.protocole] = st;
 		deep(st)
 		.bottom(this)
 		.up({
 			options:baseOptions,
-			get:deep.compose.createIfNecessary().around(function (old) {
+			get:deep.compose.around(function (old) {
 				return function (id, options) {
 					options = options || {};
 					if(id == "?" || !id)
@@ -447,7 +451,7 @@ define(["require","deep/deep"],function (require)
 					return old.apply(this,[uri+id, options]);
 				};
 			}),
-			post:deep.compose.createIfNecessary().around(function (old) {
+			post:deep.compose.around(function (old) {
 				return function (object, options) {
 					options = options || {};
 					var uri = options.uri || baseOptions.uri;
@@ -456,7 +460,7 @@ define(["require","deep/deep"],function (require)
 					return old.apply(this,[object, options]);
 				};
 			}),
-			put:deep.compose.createIfNecessary().around(function (old) {
+			put:deep.compose.around(function (old) {
 				return function (object, options) {
 					options = options || {};
 					var uri = options.uri || baseOptions.uri;
@@ -464,7 +468,7 @@ define(["require","deep/deep"],function (require)
 					return old.apply(this,[object,  options]);
 				};
 			}),
-			patch:deep.compose.createIfNecessary().around(function (old) {
+			patch:deep.compose.around(function (old) {
 				return function (object, options) {
 					options = options || {};
 					var uri = options.uri || baseOptions.uri;
@@ -472,28 +476,28 @@ define(["require","deep/deep"],function (require)
 					return old.apply(this,[object, options]);
 				};
 			}),
-			del:deep.compose.createIfNecessary().around(function (old) {
+			del:deep.compose.around(function (old) {
 				return function (id, options) {
 					options = options || {};
 					var uri = options.uri || baseOptions.uri;
 					return old.apply(this,[uri+id, options]);
 				};
 			}),
-			rpc:deep.compose.createIfNecessary().around(function (old) {
+			rpc:deep.compose.around(function (old) {
 				return function (method, params, id, options) {
 					options = options || {};
 					var uri = options.uri || baseOptions.uri;
 					return old.apply(this,[method, params, uri+id, options]);
 				};
 			}),
-			bulk:deep.compose.createIfNecessary().around(function (old) {
+			bulk:deep.compose.around(function (old) {
 				return function (arr, options) {
 					options = options || {};
 					var uri = options.uri || baseOptions.uri;
 					return old.apply(this,[arr, uri+id, options]);
 				};
 			}),
-			range:deep.compose.createIfNecessary().around(function (old) {
+			range:deep.compose.around(function (old) {
 				return function (start, end, query, options) {
 					options = options || {};
 					var uri = options.uri || baseOptions.uri;
@@ -501,7 +505,7 @@ define(["require","deep/deep"],function (require)
 					return old.apply(this,[start, end, uri+query, options]);
 				};
 			}),
-			create:deep.collider.remove()
+			"extends":deep.collider.remove()
 		});
 		return st;
 	};

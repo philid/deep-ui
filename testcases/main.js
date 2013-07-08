@@ -9,11 +9,11 @@ console.flog = function(flag, message)
 }
 
 require.config({
-	 baseUrl: "/common/js-lib"
+	 baseUrl: "/js"
    // ,paths:[{"deep":"deep"}]
    
 });
-require([ "app.js", "deep-ui/plugin", "/common/js-lib/swig/swig.pack.min.js"], function( app ) {
+require([ "app.js", "deep-ui/plugin", "/js/swig/swig.pack.min.js"], function( app ) {
   	 //console.log("requirejs main end callback 1 ");
   
   //	if(node)

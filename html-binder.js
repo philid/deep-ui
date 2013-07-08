@@ -42,9 +42,9 @@ define(["require","deep-ui/plugin"], function(require){
 
 		JsonEditorController.prototype = {
 			templates:{
-				inputText:"swig::/common/js-lib/deep-ui/templates/json-editor/input-text.html",
-				node:"swig::/common/js-lib/deep-ui/templates/json-editor/node.html",
-				item:"swig::/common/js-lib/deep-ui/templates/json-editor/item.html"
+				inputText:"swig::/js/deep-ui/templates/json-editor/input-text.html",
+				node:"swig::/js/deep-ui/templates/json-editor/node.html",
+				item:"swig::/js/deep-ui/templates/json-editor/item.html"
 			},
 			editKeyAcess:true,
 			editValueInPlace:function(selector, prop){
