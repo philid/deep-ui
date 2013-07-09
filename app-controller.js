@@ -42,9 +42,13 @@ define(["require", "./view-controller","./plugin"], function AppControllerDefine
 		{
 			if(path == $.address.path())
 				return;
-			console.log("App.updateDeepLink : ", path)
 			var parsed = path.split("/");
 			var currentMapEntry = this.deeplinkingMap;
+			if(typeof currentMapEntry === 'function')
+				currentMapEntry = currentMapEntry();
+			console.log("App.updateDeepLink : ", path)
+			console.log("App.updateDeepLink : map : ", currentMapEntry)
+
 			if(!currentMapEntry)
 				return;
 			var ok = true;
@@ -55,7 +59,7 @@ define(["require", "./view-controller","./plugin"], function AppControllerDefine
 				if(current == "")
 					continue;
 				currentMapEntry = currentMapEntry[current];
-				//console.log("App.updateDeepLink . current : ", current, currentMapEntry)
+				console.log("App.updateDeepLink . current : ", current, currentMapEntry)
 				if(!currentMapEntry)
 				{
 					console.warn("_App.updateDeepLink failed : no current map entry found with : ", current)
@@ -86,33 +90,21 @@ define(["require", "./view-controller","./plugin"], function AppControllerDefine
 		urlChanged:function (urlParams)
 		{
 			console.log("URL CHANGED params = ", urlParams);
-			var currentMapEntry = this.deeplinkingMap;
+
+			var map = this.deeplinkingMap;
+			if(typeof map === 'function')
+				map = map();
+			var currentMapEntry = map;
 			var ok = true;
 			while(urlParams.pathNames.length > 0 && ok)
 			{
-				console.log("urlChanged : while on roles ")
 				ok = false;
 				var current = urlParams.pathNames.shift();
 				//search in the map if we have a entry
 				var roleOk = false;
 				if(!currentMapEntry)
 					return;
-				if(currentMapEntry._roles && currentMapEntry._roles.length > 0)
-				{
-					var roles =  null;
-					if(! _APP.user)
-						roles = ["public"];
-					else
-						roles = _APP.user.roles || ["user"];
-					roles.forEach(function (role) {
-						roleOk = roleOk || deep.utils.inArray(role, currentMapEntry._roles);
-					});
-					console.log(" check role in ap^p-vcontrollere map : ",roleOk);
-
-					if(!roleOk)
-						return this.deeplinkingMap.defaultHandler(urlParams);
-				}
-
+	
 				if(currentMapEntry[current])
 				{
 					currentMapEntry = currentMapEntry[current]
@@ -134,7 +126,7 @@ define(["require", "./view-controller","./plugin"], function AppControllerDefine
 					currentMapEntry = currentMapEntry._id_
 					ok = true;
 				}
-				/*else if(currentMapEntry._language_ && _APP.allowedLanguages)
+				/*else if(currentMapEntry._language_ && smart.allowedLanguages)
 				{
 					currentMapEntry = currentMapEntry._id_
 					ok = true;
@@ -145,7 +137,6 @@ define(["require", "./view-controller","./plugin"], function AppControllerDefine
 					console.log("Dont find what i want in the url, redirect to default view");
 				}
 			}
-			console.log("after while on roles : ", ok, " - ", currentMapEntry)
 			//check if we have handler and execute it
 			if(ok && currentMapEntry._handler)
 			{
@@ -157,7 +148,7 @@ define(["require", "./view-controller","./plugin"], function AppControllerDefine
 			else
 			{
 				console.log(" will open the default page");
-				var defHandler = currentMapEntry.defaultHandler || this.deeplinkingMap.defaultHandler;
+				var defHandler = currentMapEntry.defaultHandler || map.defaultHandler;
 				if(defHandler)
 					defHandler.apply(this);
 				else

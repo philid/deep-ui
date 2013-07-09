@@ -164,7 +164,7 @@ define(function (require)
 			.back("controller")
 			.run(function () {
 				if(this.deepLinkPath)
-					_APP.updateDeepLink(this.deepLinkPath);
+					smart.app().updateDeepLink(this.deepLinkPath);
 			})
 			//.log("____________________________________________________________________ refreshed")
 			.run(function () {
