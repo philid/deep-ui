@@ -11,28 +11,16 @@ TO DO :
 if(typeof define !== 'function')
 	var define = require('amdefine')(module);
 
-define(["require", "./view-controller","./plugin"], function AppControllerDefine(require){
+define(["require","./plugin"], function AppControllerDefine(require){
 
 	var deep = require("deep/deep");
-	var ViewController = require("./view-controller");
 
 	var AppController =  {
 		init:function () {
-			console.log(" APP-CTRL INIT ");
-			othis=this;
-
-			$.address.externalChange(function(event) {
-				console.log(" $.address.externalChange : event : ", event);
-				othis.urlChanged(event);
-			});
-			$.address.internalChange(function (event) {
-			console.log(" $.address.internalChange : event : ", event);
-				// body...
-			});
-			//return deep(this).query("./views/*").bottom(ViewController);
+			// console.log(" APP-CTRL INIT ");	
 		},
 		load:function () {
-			console.log("APP-CTRL load");
+			// console.log("APP-CTRL load");
 			return deep(this)
 			.query("./externals")
 			.deepLoad();
@@ -46,8 +34,8 @@ define(["require", "./view-controller","./plugin"], function AppControllerDefine
 			var currentMapEntry = this.deeplinkingMap;
 			if(typeof currentMapEntry === 'function')
 				currentMapEntry = currentMapEntry();
-			console.log("App.updateDeepLink : ", path)
-			console.log("App.updateDeepLink : map : ", currentMapEntry)
+			//console.log("App.updateDeepLink : ", path)
+			// console.log("App.updateDeepLink : map : ", currentMapEntry)
 
 			if(!currentMapEntry)
 				return;
@@ -59,7 +47,7 @@ define(["require", "./view-controller","./plugin"], function AppControllerDefine
 				if(current == "")
 					continue;
 				currentMapEntry = currentMapEntry[current];
-				console.log("App.updateDeepLink . current : ", current, currentMapEntry)
+				// console.log("App.updateDeepLink . current : ", current, currentMapEntry)
 				if(!currentMapEntry)
 				{
 					console.warn("_App.updateDeepLink failed : no current map entry found with : ", current)
@@ -76,7 +64,7 @@ define(["require", "./view-controller","./plugin"], function AppControllerDefine
 		},
 		internalChange:function (path, params) 
 		{
-			console.log("ADDRESS internalChange : path : ", path, " - params : ", params);
+			//console.log("ADDRESS internalChange : path : ", path, " - params : ", params);
 			var a  = path.split("/");
 			if(a[0] == "")
 				a.shift();
@@ -89,7 +77,7 @@ define(["require", "./view-controller","./plugin"], function AppControllerDefine
 		},
 		urlChanged:function (urlParams)
 		{
-			console.log("URL CHANGED params = ", urlParams);
+			//console.log("URL CHANGED params = ", urlParams);
 
 			var map = this.deeplinkingMap;
 			if(typeof map === 'function')
@@ -147,7 +135,7 @@ define(["require", "./view-controller","./plugin"], function AppControllerDefine
 			}
 			else
 			{
-				console.log(" will open the default page");
+				// console.log(" will open the default page");
 				var defHandler = currentMapEntry.defaultHandler || map.defaultHandler;
 				if(defHandler)
 					defHandler.apply(this);
