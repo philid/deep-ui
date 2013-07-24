@@ -337,7 +337,10 @@ define(["require","deep/deep"],function (require)
 		.done(function (data, msg, jqXHR) {
 			data = self.responseParser(data, msg, jqXHR);
 			//console.log("deep.store.ajax.success : ", success);
-			def.resolve(data);
+			if(data.error)
+				def.reject(data.error);
+			else
+				def.resolve(data.result);
 		})
 		.fail(function  (jqXHR, textStatus, errorThrown)
 		{
@@ -345,7 +348,10 @@ define(["require","deep/deep"],function (require)
 			{
 				var test = self.responseParser(jqXHR.responseText, textStatus, jqXHR);
 				//console.log("deep.protocoles."+self.name+".del : error but status 2xx : ", test, " - status provided : "+jqXHR.status);
-				def.resolve(test);
+				if(test && test.error)
+					def.reject(test.error);
+				else
+					def.resolve(test.result);
 			}
 			else
 				def.reject(new Error("deep.store."+self.name+".rpc failed : "+id+" - details : "+JSON.stringify(arguments)));
