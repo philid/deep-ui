@@ -36,10 +36,6 @@ function(require, deep, VC, AC, Binder)
 	//__________________________________________________________________________ Additional API
 
 	deep.ui = {
-		swig: function(string, options) {
-			options = options || {};
-			return swig.compile(string);
-		},
 		appendTo: function(selector, force) {
 			return function(rendered, nodes) {
 				//console.log("deep.ui.appendTo : ", rendered, nodes, selector)
