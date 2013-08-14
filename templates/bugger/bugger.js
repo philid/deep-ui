@@ -28,7 +28,6 @@ deep({
     url:null,
     title:"hello",
     description:"desc",
-   // browser:'hhhhh',
     browser:{
         agent:null,
         version:""
