@@ -1,17 +1,9 @@
 {
-  "name": "deep",
+  "name": "deep-ui",
   "version": "0.5.1",
   "author": "Gilles Coomans",
   "description": "ui related stuffs for deepjs",
   "licenses": [
-     {
-         "type": "AFLv2.1",
-         "url": "http://trac.dojotoolkit.org/browser/dojo/trunk/LICENSE#L43"
-     },
-     {
-         "type": "BSD",
-         "url": "http://trac.dojotoolkit.org/browser/dojo/trunk/LICENSE#L13"
-     }
   ],
   "repository": {
     "type":"git",
@@ -20,8 +12,5 @@
   "dependencies": {
     "deep":"git+ssh://git@dev.ubik.be/deep"
   },
-  "main": "./plugin",
-  "mappings":{
-    "deep": "ssh://git@dev.ubik.be/deep"
-  }
+  "main": "./plugin"
 }
