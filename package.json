@@ -18,7 +18,7 @@
     "url":"ssh://git@dev.ubik.be/deep-ui"
   },
   "dependencies": {
-    "deep" "master"
+    "deep":"git+ssh://git@dev.ubik.be/deep"
   },
   "main": "./plugin",
   "mappings":{
