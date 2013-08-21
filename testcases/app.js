@@ -14,7 +14,7 @@ define(function(require){
 	var deep = require("deep/deep");
 
 	require("deep-ui/plugin");
-	require("deep-ui/swig-init")();
+	require("deep-swig/main")();
 	require("deep/deep-roles")(deep);
 
 
