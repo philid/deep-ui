@@ -54,7 +54,7 @@ define(function (require)
 		beforeRefresh:function () {
 			//console.log("default setbehaviour")
 		},
-		refresh:deep.compose.createIfNecessary().after(function ()
+		refresh:deep.compose.after(function ()
 		{
 			//console.log("ViewController.refresh : ",arguments)
 			var controller = this;
@@ -134,7 +134,7 @@ define(function (require)
 							return res.push(renderable.fail.apply(context, [e]) || e);
 						return res.push(e);
 					}
-					renderable.nodes = nodes;
+					renderable.nodes = function(){ return nodes; };
 					if(typeof renderable.done === "function")
 						return res.push(renderable.done.apply(context, [nodes, r, what]) || [nodes, r, what]);
 					return res.push([nodes, r, what]);
@@ -155,7 +155,8 @@ define(function (require)
 			.done(applyRenderables)
 			.up({
 				refresh:function () {
-					if(this.nodes && this.nodes.parents('html').length > 0)
+					var nodes = this.nodes();
+					if(nodes && nodes.parents('html').length > 0)
 						return deep(this)
 						.run(loadRenderable)
 						.done(applyRenderables);
@@ -168,7 +169,7 @@ define(function (require)
 			})
 			//.log("____________________________________________________________________ refreshed")
 			.run(function () {
-				var values  = deep(this.renderables).query("./*/nodes").values();
+				var values  = deep(this.renderables).query("./*/nodes").run().success();
 				if(this.setBehaviour && args.length == 0)
 					this.setBehaviour(values);
 				if(this.hasRefresh && args.length == 0)
@@ -185,8 +186,8 @@ define(function (require)
 			.position("controller")
 			.query("./renderables/["+ args +"]")
 			.run(function () {
-				if(this.nodes)
-					this.nodes.show();
+				if(this.nodes())
+					this.nodes().show();
 			})
 			.done(function () {
 				return controller;
@@ -199,8 +200,8 @@ define(function (require)
 			.position("controller")
 			.query("./renderables/["+ args +"]")
 			.run(function () {
-				if(this.nodes)
-					this.nodes.hide();
+				if(this.nodes())
+					this.nodes().hide();
 			}).done(function () {
 				return controller;
 			});
