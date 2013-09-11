@@ -1,4 +1,113 @@
-TODO : 
+Modularisation :  
+
+1) requirejs compatible
+	- optimisation
+	- late asynch load
+	- no globals
+
+2) full layered approach configurable : 
+	- templates + settings + datas 
+	- options object as argument
+	- split functions
+
+3) full encapsulation in ViewController
+	use your widgets in a view and hide behaviour behind/through VC API (load, refresh, etc) 
+
+
+var listAspect = {
+	"items-src":"profile::...",
+	locals:{
+		list:"local-src::/..../list.json"	
+	},
+	settings:{
+		pagination:30,
+		allowDelete:true
+	},
+	templates:{
+		"list-container":"swig::.../base-list-container.html",
+		"list-item":"swig::.../items.html"
+	},
+	renderables:{
+		list:{
+			how:"#./templates/list-container",
+			where:"dom.appendTo::body",
+			done:function($nodes, rendered, what){
+
+			}
+		},
+		items:{
+			how:"#./templates/list-item",
+		}
+
+	},
+	load:function(){
+		return deep(this).branches(function(brancher){
+			var self = this;
+			brancher.branch().query("./[locals,templates]").deepLoad();
+			brancher.branch()
+			.query("./items-src")
+			.load()
+			.done(function(loaded){
+				self.items = loaded;
+			});
+			return brancher;
+		});
+	},
+	refresh:function(){
+		return deep.ui.applyRenderables(this);
+	}
+}
+
+: example : 
+
+Usage 1:
+
+var myView = {
+	backgrounds:[
+		deep.ui.ViewController,
+		smart.widgets.list({
+			templates:{
+				container:"swig::...",
+				item:"swig::..."
+			},
+			datas:"profile::...",
+
+			allowDelete:true,
+			pagination:50
+		})
+	]
+}
+
+Usage 2 : 
+
+	smart.widgets.list({
+			templates:{
+				container:"swig::...",
+				item:"swig::..."
+			},
+			datas:"profile::...",
+			allowDelete:true,
+			pagination:50
+		})
+
+Localisation : 
+
+	manage it by store : 
+
+
+		locals:["/my/path/to/locals1.json","/my/path/to/locals2"]
+		
+		local::/
+
+		{{ locals|loc('/thanks/emailDomain/gmail') }}
+
+
+TODO :
+
+
+
+
+
 
 routes :
 

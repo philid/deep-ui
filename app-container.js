@@ -4,7 +4,9 @@
 
  /*
 TO DO :
-- create and add AlerterFacet : a message manager for the UI which knows how displaying alerts or loading
+
+
+
 
  */
 

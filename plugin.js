@@ -9,27 +9,27 @@ function(require, deep, VC, AC, Binder)
 	//_____________________________________________________________ Custom Chain Handler
 
 	var layer = {
-			deeplink: function(path, applyMap) {
-				var infos = path;
-				var params =null;
-				if(typeof path === 'object')
-				{
-					params = infos.parameters;
-					path = infos.path
-				}
-				var self = this;
-				var func = function(s, e) {
-					console.log("deeplink plugin : path=", infos);
-					if (applyMap) {
-						smart.app().internalChange(path, params);
-					} else {
-						smart.app().updateDeepLink(path, params);
-					}
-					return true;
-				};
-				deep.chain.addInChain.apply(this, [func]);
-				return this;
+		deeplink: function(path, applyMap) {
+			var infos = path;
+			var params =null;
+			if(typeof path === 'object')
+			{
+				params = infos.parameters;
+				path = infos.path
 			}
+			var self = this;
+			var func = function(s, e) {
+				console.log("deeplink plugin : path=", infos);
+				if (applyMap) {
+					smart.app().internalChange(path, params);
+				} else {
+					smart.app().updateDeepLink(path, params);
+				}
+				return true;
+			};
+			deep.chain.addInChain.apply(this, [func]);
+			return this;
+		}
 	};
 	deep.utils.up(layer, deep.Chain.prototype);
 
@@ -115,29 +115,6 @@ function(require, deep, VC, AC, Binder)
 
 	//___________________________________ STORES
 
-	deep.mediaCache = {
-		cache:{},
-		reloadablesUriDico : {},
-		reloadablesRegExpDico : [ /^(json::)/gi /* ,/(\.json)$/gi */ ],
-		clearCache:function ()
-		{
-			this.cache = {};
-		},
-		manage:function (response, uri) {
-			//console.log("manage cache : ", response, uri);
-			if(this.reloadablesUriDico[uri])
-				return;
-			var count = 0;
-			reg = this.reloadablesRegExpDico[count];
-			while(reg && !(reg.test(uri)))
-				reg = this.reloadablesRegExpDico[++count];
-			if(count == this.reloadablesRegExpDico.length)
-			{
-				this.cache[uri] = response;
-				//console.log("deep-ui : deep.mediaCache.manage : retain !!!")
-			}
-		}
-	};
 
 
 
