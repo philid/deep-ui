@@ -169,7 +169,7 @@ define(function (require)
 			})
 			//.log("____________________________________________________________________ refreshed")
 			.run(function () {
-				var values  = deep(this.renderables).query("./*/nodes").run().success();
+				var values  = deep(this.renderables).query("./*/nodes").run().done();
 				if(this.setBehaviour && args.length == 0)
 					this.setBehaviour(values);
 				if(this.hasRefresh && args.length == 0)
