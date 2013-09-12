@@ -121,10 +121,11 @@ define(function (require)
 					var where = (typeof renderable.where === "string")?results.shift():renderable.where;
 					var r = "";
 					var nodes = renderable.nodes || null;
+
 					try{
 						r = how.call(context,what);
 						if(where)
-							nodes = where.call(context, r, nodes);
+							nodes = where.call(context, r, nodes && nodes());
 						// console.log("render success : ", nodes,"r : ", r, "what : ", what)
 					}
 					catch(e)
