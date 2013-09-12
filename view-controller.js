@@ -122,10 +122,10 @@ define(function (require)
 					var r = "";
 					var nodes = renderable.nodes || null;
 					try{
-						r = how(what);
+						r = how.call(context,what);
 						if(where)
-							nodes = where(r, nodes);
-						// console.log("render success : ", nodes, r, what)
+							nodes = where.call(context, r, nodes);
+						// console.log("render success : ", nodes,"r : ", r, "what : ", what)
 					}
 					catch(e)
 					{

@@ -36,8 +36,8 @@ define(["require","./plugin"], function AppControllerDefine(require){
             	lang = navigator.language || navigator.userLanguage;
 		        if (lang.indexOf('en') > -1)
 		          this.language = "en";
-		        else if (lang.indexOf('fr') > -1)
-		          this.language = "fr";
+		        //else if (lang.indexOf('fr') > -1)
+		        //  this.language = "fr";
 		        else if (lang.indexOf('nl') > -1)
 		          this.language = "nl";
 		        else
