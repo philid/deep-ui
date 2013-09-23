@@ -120,31 +120,20 @@ function(require, deep, VC, AC, Binder)
 
 	//__________________________________________________
 	deep.protocoles.dom = {};
-	deep.protocoles.dom.appendTo = {
-		name:"dom.appendTo",
-		get:function (selector, options) {
+	deep.protocoles.dom.appendTo = function (selector, options) {
 			//console.log("deep.protocoles.dom.appendTO : ", selector)
 			return deep.ui.appendTo(selector);
 		}
-	};
-	deep.protocoles.dom.prependTo = {
-		name:"dom.prependTo",
-		get:function (selector, options) {
+
+	deep.protocoles.dom.prependTo = function (selector, options) {
 			return deep.ui.prependTo(selector);
 		}
-	};
-	deep.protocoles.dom.htmlOf = {
-		name:"dom.htmlOf",
-		get:function (selector, options) {
+	deep.protocoles.dom.htmlOf = function (selector, options) {
 			return deep.ui.htmlOf(selector);
 		}
-	};
-	deep.protocoles.dom.replace = {
-		name:"dom.replace",
-		get:function (selector, options) {
+	deep.protocoles.dom.replace = function (selector, options) {
 			return deep.ui.replace(selector);
 		}
-	};
 
     deep.Chain.addHandle("refresh", function()
 	{
