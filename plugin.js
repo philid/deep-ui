@@ -21,9 +21,9 @@ function(require, deep, VC, AC, Binder)
 			var func = function(s, e) {
 				console.log("deeplink plugin : path=", infos);
 				if (applyMap) {
-					smart.app().internalChange(path, params);
+					smart.app.internalChange(path, params);
 				} else {
-					smart.app().updateDeepLink(path, params);
+					smart.app.updateDeepLink(path, params);
 				}
 				return true;
 			};
