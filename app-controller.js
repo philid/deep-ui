@@ -23,7 +23,7 @@ define(["require","./plugin"], function AppControllerDefine(require){
 			// console.log("APP-CTRL load");
 			return deep(this)
 			.query("./externals")
-			.deepLoad();
+			.deepLoad(null, true);
 		},
 		currentView:null,
 		updateDeepLink:function  (path) 

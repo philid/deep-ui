@@ -42,7 +42,7 @@ define(function (require)
 				this.externals = deep.utils.copy(this._externals);
 			else if(this.externals)
 				this._externals = deep.utils.copy(this.externals);
-			return  deep(this).query("./externals").deepLoad(this).done(function(){
+			return  deep(this).query("./externals").deepLoad(this, true).done(function(loaded){
 				return self;
 			});
 			//.log("vc : load result ").log();
@@ -59,7 +59,7 @@ define(function (require)
 			//console.log("ViewController.refresh : ",arguments)
 			var controller = this;
 			var args = Array.prototype.slice.call(arguments);
-			var loadRenderable = function () {
+			/*var loadRenderable = function () {
 				if(!this.how || this.condition === false)
 					return false;
 				if(this.condition)
@@ -96,8 +96,11 @@ define(function (require)
 				objs.unshift(renderable);
 				//console.log("load renderable : ", objs)
 				return deep.all(objs)
+				// .done(function(success){
+				// 	console.log("rendeables loaded : ", success);
+				// })
 				.fail(function(error){
-					console.log("Renderables load failed : ", error);
+					// console.log("Renderables load failed : ", error);
 					if(typeof renderable.fail === 'function')
 						return renderable.fail.apply(context, [error]) || error;
 					return [{}, function(){ return ""; }, function(){} ];
@@ -106,7 +109,7 @@ define(function (require)
 
 			var applyRenderables = function (alls) // apply render and place in dom orderedly
 			{
-				//console.log("apply renderables: ", alls)
+				// console.log("apply renderables: ", alls)
 				var res = [];
 				alls.forEach(function( results )
 				{
@@ -121,7 +124,7 @@ define(function (require)
 					var where = (typeof renderable.where === "string")?results.shift():renderable.where;
 					var r = "";
 					var nodes = renderable.nodes || null;
-
+					//console.log('renderables : ', renderable, ' - how : ', how)
 					try{
 						r = how.call(context,what);
 						if(where)
@@ -130,7 +133,7 @@ define(function (require)
 					}
 					catch(e)
 					{
-						console.log("Error while rendering : ", e);
+						//console.log("Error while rendering : ", e);
 						if(typeof renderable.fail === 'function')
 							return res.push(renderable.fail.apply(context, [e]) || e);
 						return res.push(e);
@@ -141,7 +144,7 @@ define(function (require)
 					return res.push([nodes, r, what]);
 				});
 				return res;
-			};
+			};*/
 
 			return deep(this)
 			.position("controller")
@@ -152,15 +155,25 @@ define(function (require)
 			.query("./renderables/["+args.join(",")+"]")
 			//.log("________________________________ renderables to load")
 			//.logValues()
-			.run(loadRenderable)
-			.done(applyRenderables)
+			.values(function(values){
+				return deep.utils.loadTreatments(values, controller);
+			})
+			.done(function(treatments){
+				return deep.utils.applyTreatments(treatments, controller, true);
+			})
+			//.run(loadRenderable)
+			//.done(applyRenderables)
 			.up({
 				refresh:function () {
-					var nodes = this.nodes();
-					if(nodes && nodes.parents('html').length > 0)
+					var sended = this.sended();
+					if(sended && sended.parents('html').length > 0)
 						return deep(this)
-						.run(loadRenderable)
-						.done(applyRenderables);
+						.values(function(values){
+							return deep.utils.loadTreatments(values, controller);
+						})
+						.done(function(treatments){
+							return deep.utils.applyTreatments(treatments, controller, true);
+						});
 				}
 			})
 			.back("controller")
@@ -170,7 +183,7 @@ define(function (require)
 			})
 			//.log("____________________________________________________________________ refreshed")
 			.run(function () {
-				var values  = deep(this.renderables).query("./*/nodes").run().done();
+				var values  = deep(this.renderables).query("./*/sended").run().done();
 				if(this.setBehaviour && args.length == 0)
 					this.setBehaviour(values);
 				if(this.hasRefresh && args.length == 0)
@@ -187,8 +200,8 @@ define(function (require)
 			.position("controller")
 			.query("./renderables/["+ args +"]")
 			.run(function () {
-				if(this.nodes())
-					this.nodes().show();
+				if(this.sended && this.sended())
+					this.sended().show();
 			})
 			.done(function () {
 				return controller;
@@ -201,8 +214,8 @@ define(function (require)
 			.position("controller")
 			.query("./renderables/["+ args +"]")
 			.run(function () {
-				if(this.nodes())
-					this.nodes().hide();
+				if(this.sended && this.sended())
+					this.sended().hide();
 			}).done(function () {
 				return controller;
 			});

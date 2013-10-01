@@ -151,7 +151,10 @@ function(require, deep, VC, AC, Binder)
 		deep.chain.addInChain.apply(self,[func]);
 		return this;
 	});
-
 	require("./html-binder")(deep);
 	return deep;
 });
+
+
+
+
