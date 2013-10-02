@@ -145,7 +145,12 @@ function(require, deep, VC, AC, Binder)
 				else
 					alls.push(v);
 			})
-			return deep.all(alls);
+			return deep.all(alls)
+			.done(function(alls){
+				if(!self._queried)
+					return alls.shift();
+				return alls;
+			});
 		}
 		func._isDone_ = true;
 		deep.chain.addInChain.apply(self,[func]);
